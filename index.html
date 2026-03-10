@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Score Rule Engine</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#222;background:#f0f2f5}
+.app-header{background:#1a3c6e;padding:10px 22px;display:flex;align-items:center;justify-content:space-between}
+.app-title{color:#fff;font-size:15px;font-weight:bold;letter-spacing:.3px}
+.app-sub{color:#a8c4e0;font-size:11px;margin-top:1px}
+.tab-bar{background:#fff;border-bottom:1px solid #dde2ea;padding:0 20px;display:flex}
+.tab{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;padding:10px 16px;font-size:13px;color:#555;cursor:pointer;white-space:nowrap;font-family:inherit}
+.tab.active{border-bottom-color:#1a3c6e;color:#1a3c6e;font-weight:bold}
+.tab:hover:not(.active){color:#1a3c6e}
+.panel{display:none;padding:18px 20px;max-width:1200px}
+.panel.active{display:block}
+.btn{border-radius:2px;padding:4px 12px;font-size:12px;cursor:pointer;border:1px solid #ccc;background:#fff;color:#333;font-family:inherit}
+.btn:hover{background:#f0f0f0}
+.btn-primary{background:#1a3c6e;color:#fff;border-color:#1a3c6e}
+.btn-primary:hover{background:#153062}
+.btn-teal{background:#00695c;color:#fff;border-color:#00695c}
+.btn-teal:hover{background:#004d40}
+.btn-dashed{background:#fff;border:1px dashed #bbb;color:#888;border-radius:2px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-dashed:hover{border-color:#1a3c6e;color:#1a3c6e}
+.btn-sm{padding:2px 9px;font-size:11px}
+.btn-icon{background:none;border:none;cursor:pointer;padding:2px 5px;color:#ccc;font-size:14px;line-height:1;font-family:inherit}
+.btn-icon:hover{color:#c00}
+label.fl{display:block;font-size:11px;color:#555;margin-bottom:3px;font-weight:bold}
+.fi{width:100%;border:1px solid #ccc;border-radius:2px;padding:4px 7px;font-size:12px;background:#fff;font-family:inherit}
+.fi:focus{outline:none;border-color:#1a3c6e}
+.fsel{border:1px solid #ccc;border-radius:2px;padding:4px 7px;font-size:12px;background:#fff;cursor:pointer;font-family:inherit}
+.fsel:focus{outline:none;border-color:#1a3c6e}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.col{flex:1;min-width:100px}
+.col-auto{flex:0 0 auto}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-title{font-size:11px;font-weight:bold;color:#1a3c6e;text-transform:uppercase;letter-spacing:.6px}
+.add-panel{background:#f9fafc;border:1px solid #dde2ea;border-radius:2px;padding:12px;margin:8px 0 4px;display:none}
+.add-panel.open{display:block}
+.add-panel-title{font-size:11px;font-weight:bold;color:#1a3c6e;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+
+/* badges */
+.feat-badge{font-size:9px;padding:1px 5px;border-radius:8px;font-weight:bold;flex-shrink:0}
+.feat-badge-num{background:#e8f5e9;color:#1a6e3c}
+.feat-badge-str{background:#f3e5f5;color:#7b1fa2}
+.feat-badge-dd {background:#e0f2f1;color:#00695c}
+.tag-table{font-size:9px;padding:1px 5px;border-radius:8px;background:#fff3e0;color:#e65100;font-weight:bold;flex-shrink:0}
+
+/* dropdown value chips */
+.dd-chip{display:inline-flex;align-items:center;gap:3px;background:#e0f2f1;color:#00695c;border:1px solid #b2dfdb;border-radius:10px;font-size:10px;padding:1px 6px;font-weight:600;margin:2px 2px}
+.dd-chip-del{background:none;border:none;cursor:pointer;color:#aaa;font-size:11px;line-height:1;padding:0 0 0 2px;font-family:inherit}
+.dd-chip-del:hover{color:#c00}
+.dd-chips-row{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-top:6px}
+.dd-empty{font-size:10px;color:#ccc;font-style:italic;padding:4px 0}
+
+/* tree */
+.tree-group{margin-bottom:8px;border:1px solid #dde2ea;border-radius:3px;background:#fff;overflow:hidden}
+.tree-group-hdr{display:flex;align-items:center;gap:7px;padding:8px 12px;background:#eef3fa;cursor:pointer;user-select:none;border-bottom:1px solid #dde2ea}
+.tree-group-hdr:hover{background:#e0eaf7}
+.tree-group-name{font-weight:bold;color:#1a3c6e;font-size:13px;flex:1}
+.tree-meta{font-size:10px;color:#999;background:#fff;border:1px solid #dde2ea;border-radius:8px;padding:1px 7px}
+.tree-group-body{padding:8px 10px 6px}
+.tree-sg-hdr{display:flex;align-items:center;gap:6px;padding:5px 8px;background:#f7f9fc;border-radius:2px;cursor:pointer;user-select:none;border:1px solid #e8edf4;margin-bottom:4px}
+.tree-sg-hdr:hover{background:#eef3fa}
+.tree-sg-name{font-weight:600;color:#333;font-size:12px;flex:1}
+.tree-sg-body{padding:3px 0 2px 10px}
+.tree-feat{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:2px;cursor:default;margin-bottom:3px;border:1px solid #eee;background:#fff}
+.tree-feat.clickable{cursor:pointer}
+.tree-feat.clickable:hover{border-color:#1a3c6e;background:#f5f8ff}
+.tree-feat.selected{border-color:#1a3c6e;background:#eef3fa}
+.tree-feat-name{flex:1;font-size:12px;color:#333}
+.chevron{font-size:9px;color:#888;display:inline-block;transition:transform .15s;flex-shrink:0}
+.chevron.open{transform:rotate(90deg)}
+.empty-state{text-align:center;padding:24px;color:#bbb;font-size:12px}
+
+/* variables tab */
+.var-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.search-box{border:1px solid #ccc;border-radius:2px;padding:4px 9px;font-size:12px;background:#fff;font-family:inherit;width:200px}
+.search-box:focus{outline:none;border-color:#1a3c6e}
+.var-tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid #dde2ea;font-size:12px}
+.var-tbl th{text-align:left;padding:7px 10px;background:#eef3fa;color:#1a3c6e;font-weight:700;border-bottom:2px solid #ccd6eb;white-space:nowrap;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.var-tbl td{padding:7px 10px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+.var-tbl tr:last-child td{border-bottom:none}
+.var-tbl tr.main-row:hover td{background:#f5f8ff}
+.var-tbl tr.main-row.dd-expanded td{background:#f0faf9;border-bottom:none}
+.var-tbl tr.dd-expand-row td{background:#f0faf9;border-bottom:1px solid #b2dfdb;padding:8px 10px 10px}
+.var-count-badge{display:inline-flex;align-items:center;justify-content:center;background:#1a3c6e;color:#fff;border-radius:10px;font-size:10px;font-weight:bold;padding:1px 7px;margin-left:6px}
+
+/* score rules — wizard design */
+.rb-wrap{background:#f4f6fb;min-height:calc(100vh - 100px);padding:0}
+/* stepper */
+.rb-stepper{display:flex;align-items:center;justify-content:center;padding:28px 20px 24px;background:#fff;border-bottom:1px solid #e8edf4;gap:0}
+.rb-step{display:flex;align-items:center;gap:0;flex-shrink:0}
+.rb-step-circle{width:30px;height:30px;border-radius:50%;border:2px solid #c5cde2;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#c5cde2;flex-shrink:0;transition:all .2s}
+.rb-step-circle.active{border-color:#1a3c6e;background:#1a3c6e;color:#fff}
+.rb-step-circle.done{border-color:#2e7d32;background:#2e7d32;color:#fff}
+.rb-step-label{font-size:11px;color:#aaa;margin-left:8px;white-space:nowrap;font-weight:500}
+.rb-step-label.active{color:#1a3c6e;font-weight:700}
+.rb-step-line{height:2px;width:60px;background:#e0e4ed;flex-shrink:0;margin:0 4px}
+/* form card */
+.rb-card{background:#fff;border:1px solid #e0e4ed;border-radius:8px;padding:22px 24px;margin:20px 0 14px}
+.rb-form-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.rb-field{display:flex;flex-direction:column;gap:5px}
+.rb-label{font-size:12px;color:#444;font-weight:600;letter-spacing:.1px}
+.rb-select{border:1.5px solid #d0d5e0;border-radius:6px;padding:8px 32px 8px 12px;font-size:13px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aaa'/%3E%3C/svg%3E") no-repeat right 10px center;-webkit-appearance:none;appearance:none;cursor:pointer;font-family:inherit;color:#222;min-width:0}
+.rb-select:focus{outline:none;border-color:#1a3c6e}
+.rb-input{border:1.5px solid #d0d5e0;border-radius:6px;padding:8px 12px;font-size:13px;background:#fff;font-family:inherit;color:#222;min-width:0;width:100%}
+.rb-input:focus{outline:none;border-color:#1a3c6e}
+.rb-btn-add{background:#1a3c6e;color:#fff;border:none;border-radius:6px;padding:8px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;height:38px}
+.rb-btn-add:hover{background:#153062}
+.rb-btn-add:disabled{background:#b0bcd6;cursor:not-allowed}
+/* active rules label */
+.rb-active-lbl{font-size:13px;color:#1a3c6e;font-weight:700;margin-bottom:8px}
+.rb-active-lbl span{color:#555;font-weight:400}
+/* rules table */
+.rb-tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e0e4ed;border-radius:8px;overflow:hidden;font-size:12px}
+.rb-tbl th{text-align:left;padding:10px 14px;background:#faf7ee;color:#7a6a3a;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid #ede7cc}
+.rb-tbl td{padding:10px 14px;border-bottom:1px solid #f3f4f7;vertical-align:middle;color:#333}
+.rb-tbl tr:last-child td{border-bottom:none}
+.rb-tbl tr:hover td{background:#f8f9fc}
+.rb-score-pill{display:inline-flex;align-items:center;justify-content:center;width:30px;height:22px;border-radius:11px;font-weight:700;font-size:12px}
+.rb-sc-hi{background:#e8f5e9;color:#1a6e3c}
+.rb-sc-mid{background:#fff3e0;color:#e65100}
+.rb-sc-lo{background:#ffebee;color:#c62828}
+.rb-del-btn{background:none;border:none;cursor:pointer;color:#c5cde2;font-size:16px;line-height:1;padding:0 2px;font-family:inherit}
+.rb-del-btn:hover{color:#c00}
+.rb-empty-tbl{text-align:center;padding:28px;color:#bbb;font-size:12px}
+/* nav row */
+.rb-nav-row{display:flex;justify-content:flex-end;padding:0 0 10px}
+.rb-btn-next{background:#1a3c6e;color:#fff;border:none;border-radius:6px;padding:9px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.rb-btn-next:hover{background:#153062}
+/* condition display */
+.rb-cond{font-family:'Courier New',monospace;font-size:11px;color:#555}
+/* filter tabs */
+.rb-filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.rb-ftab{border:1.5px solid #d0d5e0;background:#fff;border-radius:16px;padding:3px 12px;font-size:11px;color:#777;cursor:pointer;font-family:inherit;font-weight:600}
+.rb-ftab:hover{border-color:#1a3c6e;color:#1a3c6e}
+.rb-ftab.active{border-color:#1a3c6e;background:#1a3c6e;color:#fff}
+.rb-op-locked{border:1.5px solid #e0e4ed;border-radius:6px;padding:0 12px;font-size:13px;height:38px;box-sizing:border-box}
+/* dd-warn reused */
+.dd-warn{background:#e0f2f1;border:1px solid #b2dfdb;border-radius:6px;padding:8px 12px;font-size:11px;color:#00695c;margin-bottom:10px}
+
+/* simulate */
+.sim-layout{display:flex;gap:14px;align-items:flex-start}
+.sim-inputs{flex:1.2;min-width:0}
+.sim-results{width:350px;flex-shrink:0}
+.sim-group{margin-bottom:10px;border:1px solid #dde2ea;border-radius:3px;background:#fff;overflow:hidden}
+.sim-group-hdr{padding:7px 12px;background:#eef3fa;font-weight:bold;font-size:12px;color:#1a3c6e;border-bottom:1px solid #dde2ea}
+.sim-sg-hdr{padding:4px 12px;font-size:10px;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:#f7f9fc;border-bottom:1px solid #f0f0f0}
+.sim-feat-row{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid #f5f5f5}
+.sim-feat-row:last-child{border-bottom:none}
+.sim-feat-label{width:230px;font-size:12px;color:#333;flex-shrink:0}
+.sim-feat-match{flex:1;font-size:11px}
+.result-card{background:#fff;border:1px solid #dde2ea;border-radius:3px;overflow:hidden;margin-bottom:10px}
+.result-card-hdr{padding:7px 14px;background:#1a3c6e;color:#fff;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.result-metrics{display:flex}
+.result-metric{flex:1;padding:11px 8px;text-align:center;border-right:1px solid #eee}
+.result-metric:last-child{border-right:none}
+.result-metric-val{font-size:22px;font-weight:bold;color:#1a3c6e;font-family:monospace;display:block}
+.result-metric-lbl{font-size:9px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.score-prog-wrap{padding:8px 14px 10px;border-top:1px solid #f0f0f0}
+.score-prog{height:7px;background:#eee;border-radius:4px;overflow:hidden;margin-top:4px}
+.score-prog-bar{height:100%;background:#1a3c6e;border-radius:4px;transition:width .4s,background .4s}
+.res-table{width:100%;border-collapse:collapse;font-size:11px}
+.res-table th{text-align:left;padding:5px 10px;background:#f5f6f8;color:#777;font-weight:600;border-bottom:1px solid #eee}
+.res-table td{padding:6px 10px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+.res-table tr:last-child td{border-bottom:none}
+.res-table tr.hit td{background:#fafff9}
+.match-badge{font-size:10px;padding:1px 6px;border-radius:8px;font-weight:bold}
+.match-hit{background:#e8f5e9;color:#1a6e3c}
+.match-miss{background:#f5f5f5;color:#ccc}
+.step-row{display:flex;gap:6px;margin-bottom:12px;align-items:center}
+.step-dot{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;flex-shrink:0}
+.step-dot-active{background:#1a3c6e;color:#fff}
+.step-dot-idle{background:#e0e0e0;color:#999}
+.step-label{font-size:11px;color:#555}
+#panel-rules{padding:0;max-width:100%}
+/* weights tab */
+.wt-section{margin-bottom:28px}
+.wt-section-title{font-size:11px;font-weight:700;color:#1a3c6e;text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.wt-tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e0e4ed;border-radius:8px;overflow:hidden;font-size:13px}
+.wt-tbl th{text-align:left;padding:10px 16px;background:#faf7ee;color:#7a6a3a;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid #ede7cc}
+.wt-tbl td{padding:9px 16px;border-bottom:1px solid #f3f4f7;vertical-align:middle}
+.wt-tbl tr:last-child td{border-bottom:none}
+.wt-input{border:1.5px solid #d0d5e0;border-radius:6px;padding:7px 11px;font-size:13px;font-family:inherit;width:180px;background:#fff;color:#222}
+.wt-input:focus{outline:none;border-color:#1a3c6e}
+.wt-norm{font-weight:700;font-size:13px;min-width:80px;display:inline-block}
+.wt-norm-warn{color:#e65100}
+.wt-norm-ok{color:#2e7d32}
+.wt-sum-row td{background:#f5f8ff;font-weight:700;border-top:2px solid #ccd6eb}
+.wt-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700}
+.wt-badge-ok{background:#e8f5e9;color:#1a6e3c}
+.wt-badge-warn{background:#fff3e0;color:#e65100}
+.wt-sg-card{margin-bottom:14px;border:1px solid #e0e4ed;border-radius:8px;overflow:hidden}
+.wt-sg-card-hdr{padding:9px 16px;background:#eef3fa;font-weight:700;font-size:12px;color:#1a3c6e;display:flex;align-items:center;gap:10px;border-bottom:1px solid #dde2ea}
+.wt-note{font-size:11px;color:#aaa;margin-top:6px;padding-left:2px}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div>
+    <div class="app-title">Score Rule Engine</div>
+    <div class="app-sub">Credit Underwriting &middot; Entity Scoring Framework</div>
+  </div>
+  <div style="font-size:11px;color:#a8c4e0">v3.0</div>
+</div>
+<div class="tab-bar">
+  <button class="tab active"  onclick="switchTab('features',this)">Features</button>
+  <button class="tab"         onclick="switchTab('vars',this)">Variables</button>
+  <button class="tab"         onclick="switchTab('rules',this)">Score Rules</button>
+  <button class="tab"         onclick="switchTab('weights',this)">Weights</button>
+  <button class="tab"         onclick="switchTab('simulate',this)">Simulate</button>
+</div>
+<div id="panel-features" class="panel active"></div>
+<div id="panel-vars"     class="panel"></div>
+<div id="panel-rules"    class="panel"></div>
+<div id="panel-weights"  class="panel"></div>
+<div id="panel-simulate" class="panel"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CATALOG
+// ═══════════════════════════════════════════════════════════════
+const CATALOG = [
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'CurrentRatio',                       defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'QuickRatio',                         defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'CashRatio',                          defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'InventoryDays',                      defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'TradeReceivablesDays',               defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'TradePayablesDays',                  defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'DebtEquityRatio',                    defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'TotalLiabilitiesToTangibleNetworth',  defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'DebtServiceCoverageRatio',           defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'InterestCoverageRatio',              defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'TotalDebtToEBITDARatio',             defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'GrossProfitMargin',                  defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'OperatingProfitMargin',              defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'NetProfitMargin',                    defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'ReturnOnAssets',                     defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'ReturnOnCapitalEmployed',            defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'OperatingCashFlowToTotalDebt',       defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'FCFFRatio',                          defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'FixedAssetsTurnoverRatio',           defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'WorkingCapitalCycleDays',            defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'TotalDebt',                          defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'EBITDA',                             defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'GrossProfit',                        defaultType:'number'},
+  {table:'financial_ratios',      catName:'Financials',    subCatName:'Financials latest',      field:'RevenueFromOperations',              defaultType:'number'},
+  {table:'financial_performance', catName:'Financials',    subCatName:'Financial Performance',  field:'CagrTotalDebtByTnwL3Y',              defaultType:'number'},
+  {table:'financial_performance', catName:'Financials',    subCatName:'Financial Performance',  field:'CagrRevenueFromOperationsL3Y',       defaultType:'number'},
+  {table:'financial_performance', catName:'Financials',    subCatName:'Financial Performance',  field:'CagrEBITDAL3Y',                      defaultType:'number'},
+  {table:'financial_performance', catName:'Financials',    subCatName:'Financial Performance',  field:'CagrWorkingCapitalCycleDaysL3Y',     defaultType:'number'},
+  {table:'financial_performance', catName:'Financials',    subCatName:'Financial Performance',  field:'CagrDebtServiceCoverageRatioL3Y',    defaultType:'number'},
+  {table:'industry_peer',         catName:'Financials',    subCatName:'Industry risk peer',     field:'RelativeDiffRevenue',                defaultType:'number'},
+  {table:'industry_peer',         catName:'Financials',    subCatName:'Industry risk peer',     field:'RelativeDiffEbitdaMargin',           defaultType:'number'},
+  {table:'industry_peer',         catName:'Financials',    subCatName:'Industry risk peer',     field:'RelativeDiffWcCycle',                defaultType:'number'},
+  {table:'industry_peer',         catName:'Financials',    subCatName:'Industry risk peer',     field:'RelativeDiffPat',                    defaultType:'number'},
+  {table:'triangulation_data',    catName:'Triangulation', subCatName:'Liquidity',              field:'FOIR',                               defaultType:'number'},
+  {table:'triangulation_data',    catName:'Triangulation', subCatName:'Delinquency',            field:'PercentIncreaseEMIL6M',              defaultType:'number'},
+  {table:'triangulation_data',    catName:'Triangulation', subCatName:'Liquidity',              field:'UtilisationRevCreditFacility',       defaultType:'number'},
+  {table:'bureau_data',           catName:'Bureau',        subCatName:'Bureau enquiry',         field:'CountEnqUnsecLoansL6MWtd',           defaultType:'number'},
+  {table:'bureau_data',           catName:'Bureau',        subCatName:'Account history',        field:'WeightedUnsecuredTradelinesCountL6M',defaultType:'number'},
+  {table:'bureau_data',           catName:'Bureau',        subCatName:'Delinquency history',    field:'WeightedSmaCountL12M',               defaultType:'number'},
+  {table:'bureau_data',           catName:'Bureau',        subCatName:'Account history',        field:'IncreaseRatioActiveToTotalLoans',    defaultType:'number'},
+  {table:'behavioural_data',      catName:'Behavioural',   subCatName:'Covenant',               field:'AvgDelaysDocSubmission',             defaultType:'number'},
+  {table:'bsa_data',              catName:'BSA',           subCatName:'Churn',                  field:'ABB',                                defaultType:'number'},
+  {table:'bsa_data',              catName:'BSA',           subCatName:'Cash transactions',      field:'CashTrasantionCagr',                 defaultType:'number'},
+  {table:'bsa_data',              catName:'BSA',           subCatName:'Cash transactions',      field:'CashTransactionAsPercentABB',        defaultType:'number'},
+  {table:'bsa_data',              catName:'BSA',           subCatName:'Churn',                  field:'ChurnRate',                          defaultType:'number'},
+  {table:'news_data',             catName:'News',          subCatName:'Management',             field:'SentimentScore',                     defaultType:'number'},
+  {table:'news_data',             catName:'News',          subCatName:'Sectoral risk',          field:'CountSectorImpactNews',              defaultType:'number'},
+  {table:'news_data',             catName:'News',          subCatName:'Raid',                   field:'SentimentScore',                     defaultType:'number'},
+  {table:'legal_data',            catName:'Legal',         subCatName:'District',               field:'CountPendingDistrictCourtRecencyTimeWeighted', defaultType:'number'},
+  {table:'legal_data',            catName:'Legal',         subCatName:'High court',             field:'CountPendingHighCourtRecencyTimeWeighted',     defaultType:'number'},
+  {table:'legal_data',            catName:'Legal',         subCatName:'NCLT',                   field:'CountPendingNCLTCourtRecencyTimeWeighted',     defaultType:'number'},
+  {table:'compliance_data',       catName:'Compliance',    subCatName:'GST',                    field:'DelayedFilingsGstL12MTimeWeighted',   defaultType:'number'},
+  {table:'compliance_data',       catName:'Compliance',    subCatName:'EPFO',                   field:'DelayedFilingsEpfoL12MTimeWeighted',  defaultType:'number'},
+  {table:'compliance_data',       catName:'Compliance',    subCatName:'Others',                 field:'DelayedFilingsMcaL12MTimeWeighted',   defaultType:'number'},
+  {table:'management_data',       catName:'Management',    subCatName:'Shareholding',           field:'PromoterPledgeIncreasePercent',       defaultType:'number'},
+  {table:'management_data',       catName:'Management',    subCatName:'Shareholding',           field:'PromoterShareholdingDeclinePercent',  defaultType:'number'},
+  {table:'management_data',       catName:'Management',    subCatName:'Churn',                  field:'CountResignationAuditorOutOfNorm',   defaultType:'number'},
+  {table:'management_data',       catName:'Management',    subCatName:'Churn',                  field:'CountResignationKmp',               defaultType:'number'},
+  // Demographic — dropdown type fields
+  {table:'demographic_data',      catName:'Demographic',   subCatName:'Entity',                 field:'Constitution',                       defaultType:'dropdown'},
+  {table:'demographic_data',      catName:'Demographic',   subCatName:'Entity',                 field:'EntityVintageYears',                 defaultType:'number'},
+  {table:'demographic_data',      catName:'Demographic',   subCatName:'Geography',              field:'StateCode',                          defaultType:'dropdown'},
+  {table:'demographic_data',      catName:'Demographic',   subCatName:'Geography',              field:'RegionTier',                         defaultType:'dropdown'},
+  {table:'demographic_data',      catName:'Demographic',   subCatName:'Promoter',               field:'PromotedSex',                        defaultType:'dropdown'},
+  {table:'demographic_data',      catName:'Demographic',   subCatName:'Promoter',               field:'PromotedAgeYears',                   defaultType:'number'},
+];
+const TABLES=[...new Set(CATALOG.map(c=>c.table))];
+function catalogByTable(t){return CATALOG.filter(c=>c.table===t);}
+
+// ═══════════════════════════════════════════════════════════════
+// ENGINE DATA
+// ═══════════════════════════════════════════════════════════════
+function uid(){return 'x'+Math.random().toString(36).slice(2,10);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function scCls(s){return s>=7?'hi':s>=4?'mid':'lo';}
+function chipCls(s){return 'score-chip sc-'+scCls(s);}
+function bandRowCls(s){return 'band-row band-'+scCls(s);}
+function dtBadge(dt){
+  if(dt==='dropdown') return '<span class="feat-badge feat-badge-dd">DROPDOWN</span>';
+  if(dt==='string')   return '<span class="feat-badge feat-badge-str">STRING</span>';
+  return '<span class="feat-badge feat-badge-num">NUMERIC</span>';
+}
+function dtBadgeSm(dt){
+  if(dt==='dropdown') return '<span class="feat-badge feat-badge-dd" style="font-size:8px">D</span>';
+  if(dt==='string')   return '<span class="feat-badge feat-badge-str" style="font-size:8px">S</span>';
+  return '<span class="feat-badge feat-badge-num" style="font-size:8px">N</span>';
+}
+
+let groups = [
+  {id:'g1', name:'Financials',    open:true },
+  {id:'g2', name:'Bureau',        open:true },
+  {id:'g3', name:'BSA',           open:true },
+  {id:'g4', name:'News',          open:true },
+  {id:'g5', name:'Legal',         open:false},
+  {id:'g6', name:'Compliance',    open:false},
+  {id:'g7', name:'Management',    open:false},
+  {id:'g8', name:'Triangulation', open:false},
+  {id:'g9', name:'Behavioural',   open:false},
+  {id:'g10',name:'Demographic',   open:true },
+];
+let subGroups = [
+  {id:'sg1', gId:'g1',  name:'Financial Performance', open:true },
+  {id:'sg2', gId:'g1',  name:'Financial Standalone',  open:true },
+  {id:'sg3', gId:'g1',  name:'Industry Risk Peer',    open:false},
+  {id:'sg4', gId:'g2',  name:'Bureau Enquiry',        open:true },
+  {id:'sg5', gId:'g2',  name:'Account History',       open:true },
+  {id:'sg6', gId:'g2',  name:'Delinquency History',   open:true },
+  {id:'sg7', gId:'g3',  name:'Churn',                 open:true },
+  {id:'sg8', gId:'g3',  name:'Cash Transactions',     open:true },
+  {id:'sg9', gId:'g4',  name:'Management',            open:true },
+  {id:'sg10',gId:'g4',  name:'Sectoral Risk',         open:false},
+  {id:'sg11',gId:'g5',  name:'District',              open:true },
+  {id:'sg12',gId:'g5',  name:'High Court',            open:true },
+  {id:'sg13',gId:'g5',  name:'NCLT',                  open:true },
+  {id:'sg14',gId:'g6',  name:'GST',                   open:true },
+  {id:'sg15',gId:'g6',  name:'EPFO',                  open:true },
+  {id:'sg16',gId:'g7',  name:'Shareholding',          open:true },
+  {id:'sg17',gId:'g7',  name:'Churn',                 open:true },
+  {id:'sg18',gId:'g8',  name:'Liquidity',             open:true },
+  {id:'sg19',gId:'g9',  name:'Covenant',              open:true },
+  {id:'sg20',gId:'g10', name:'Entity',                open:true },
+  {id:'sg21',gId:'g10', name:'Geography',             open:true },
+  {id:'sg22',gId:'g10', name:'Promoter',              open:false},
+];
+// feature.dropdownValues = string[] for dataType==='dropdown'
+let features = [
+  {id:'f1',  sgId:'sg1',  catalogField:'CagrRevenueFromOperationsL3Y', sourceTable:'financial_performance', dataType:'number',   unit:'%', displayName:'Revenue CAGR (3Y)',          dropdownValues:[]},
+  {id:'f2',  sgId:'sg1',  catalogField:'CagrEBITDAL3Y',                sourceTable:'financial_performance', dataType:'number',   unit:'%', displayName:'EBITDA CAGR (3Y)',            dropdownValues:[]},
+  {id:'f3',  sgId:'sg2',  catalogField:'DebtEquityRatio',              sourceTable:'financial_ratios',       dataType:'number',   unit:'x', displayName:'Debt Equity Ratio',          dropdownValues:[]},
+  {id:'f4',  sgId:'sg2',  catalogField:'InterestCoverageRatio',        sourceTable:'financial_ratios',       dataType:'number',   unit:'x', displayName:'Interest Coverage Ratio',    dropdownValues:[]},
+  {id:'f5',  sgId:'sg2',  catalogField:'NetProfitMargin',              sourceTable:'financial_ratios',       dataType:'number',   unit:'%', displayName:'Net Profit Margin',          dropdownValues:[]},
+  {id:'f6',  sgId:'sg4',  catalogField:'CountEnqUnsecLoansL6MWtd',    sourceTable:'bureau_data',            dataType:'number',   unit:'',  displayName:'Unsecured Loan Enquiries (6M)',dropdownValues:[]},
+  {id:'f7',  sgId:'sg6',  catalogField:'WeightedSmaCountL12M',         sourceTable:'bureau_data',            dataType:'number',   unit:'',  displayName:'SMA Count (12M)',             dropdownValues:[]},
+  {id:'f8',  sgId:'sg7',  catalogField:'ABB',                          sourceTable:'bsa_data',               dataType:'number',   unit:'₹', displayName:'Average Bank Balance',        dropdownValues:[]},
+  {id:'f9',  sgId:'sg9',  catalogField:'SentimentScore',               sourceTable:'news_data',              dataType:'number',   unit:'',  displayName:'Mgmt Sentiment Score',        dropdownValues:[]},
+  // Dropdown feature — Constitution
+  {id:'f10', sgId:'sg20', catalogField:'Constitution',                 sourceTable:'demographic_data',       dataType:'dropdown', unit:'',  displayName:'Constitution',
+   dropdownValues:['Proprietorship','Partnership','LLP','Private Limited','Public Limited','Trust','Society','HUF']},
+  // Another dropdown — Region Tier
+  {id:'f11', sgId:'sg21', catalogField:'RegionTier',                   sourceTable:'demographic_data',       dataType:'dropdown', unit:'',  displayName:'Region Tier',
+   dropdownValues:['Metro','Tier 1','Tier 2','Tier 3','Rural']},
+];
+let bands = [
+  {id:'b1',  fId:'f1',  condType:'range', op:'>=',      v1:15,  v2:null, score:9},
+  {id:'b2',  fId:'f1',  condType:'range', op:'between', v1:5,   v2:15,   score:6},
+  {id:'b3',  fId:'f1',  condType:'range', op:'<',       v1:5,   v2:null, score:2},
+  {id:'b4',  fId:'f3',  condType:'range', op:'<=',      v1:1,   v2:null, score:9},
+  {id:'b5',  fId:'f3',  condType:'range', op:'between', v1:1,   v2:2,    score:5},
+  {id:'b6',  fId:'f3',  condType:'range', op:'>',       v1:2,   v2:null, score:2},
+  {id:'b7',  fId:'f4',  condType:'range', op:'>=',      v1:3,   v2:null, score:9},
+  {id:'b8',  fId:'f4',  condType:'range', op:'between', v1:1.5, v2:3,    score:5},
+  {id:'b9',  fId:'f4',  condType:'range', op:'<',       v1:1.5, v2:null, score:2},
+  {id:'b10', fId:'f9',  condType:'range', op:'>=',      v1:7,   v2:null, score:9},
+  {id:'b11', fId:'f9',  condType:'range', op:'between', v1:4,   v2:7,    score:5},
+  {id:'b12', fId:'f9',  condType:'range', op:'<',       v1:4,   v2:null, score:1},
+  // Dropdown bands — Constitution
+  {id:'b13', fId:'f10', condType:'exact', op:'==', v1:'Proprietorship', v2:null, score:5},
+  {id:'b14', fId:'f10', condType:'exact', op:'==', v1:'Partnership',    v2:null, score:5},
+  {id:'b15', fId:'f10', condType:'exact', op:'==', v1:'LLP',            v2:null, score:7},
+  {id:'b16', fId:'f10', condType:'exact', op:'==', v1:'Private Limited',v2:null, score:8},
+  {id:'b17', fId:'f10', condType:'exact', op:'==', v1:'Public Limited', v2:null, score:9},
+  // Region Tier bands
+  {id:'b18', fId:'f11', condType:'exact', op:'==', v1:'Metro',   v2:null, score:9},
+  {id:'b19', fId:'f11', condType:'exact', op:'==', v1:'Tier 1',  v2:null, score:7},
+  {id:'b20', fId:'f11', condType:'exact', op:'==', v1:'Tier 2',  v2:null, score:5},
+  {id:'b21', fId:'f11', condType:'exact', op:'==', v1:'Tier 3',  v2:null, score:3},
+  {id:'b22', fId:'f11', condType:'exact', op:'==', v1:'Rural',   v2:null, score:2},
+];
+
+let varSearch = '';
+let varFilter  = '';
+let expandedVarId = null; // fId whose dropdown values section is open in Variables tab
+
+// ── helpers ───────────────────────────────────────────────────
+function getSG(f){return subGroups.find(s=>s.id===f.sgId);}
+function getG(f){const sg=getSG(f);return sg?groups.find(g=>g.id===sg.gId):null;}
+function alreadyAdded(table,field){return features.some(f=>f.sourceTable===table&&f.catalogField===field);}
+function getFeat(fId){return features.find(f=>f.id===fId);}
+
+function fmtBand(b,f){
+  if(b.condType==='exact') return `= "${b.v1}"`;
+  const u=f.unit?' '+f.unit:'';
+  switch(b.op){
+    case '>=': return `\u2265 ${b.v1}${u}`;
+    case '>':  return `> ${b.v1}${u}`;
+    case '<=': return `\u2264 ${b.v1}${u}`;
+    case '<':  return `< ${b.v1}${u}`;
+    case '==': return `= ${b.v1}${u}`;
+    case 'between': return `${b.v1}${u} \u2013 ${b.v2}${u}`;
+  }
+  return '';
+}
+function evalBand(b,raw,dt){
+  if(dt==='dropdown'||dt==='string')
+    return b.op==='==' && raw.trim().toLowerCase()===String(b.v1).toLowerCase();
+  const v=parseFloat(raw); if(isNaN(v)) return false;
+  switch(b.op){
+    case '>=': return v>=b.v1; case '>': return v>b.v1;
+    case '<=': return v<=b.v1; case '<': return v<b.v1;
+    case '==': return v===b.v1;
+    case 'between': return v>=b.v1&&v<=b.v2;
+  }
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURES TAB
+// ═══════════════════════════════════════════════════════════════
+function renderFeatures(){
+  let h=`
+  <div class="section-hdr">
+    <div class="section-title">Variable Groups &amp; Features</div>
+    <button class="btn btn-primary btn-sm" onclick="toggleAddGroup()">+ Add Group</button>
+  </div>
+  <div id="add-group-panel" class="add-panel">
+    <div class="add-panel-title">New Variable Group</div>
+    <div class="row">
+      <div class="col"><label class="fl">Group Name</label>
+        <input class="fi" id="ng-name" placeholder="e.g. Macro Indicators" onkeydown="if(event.key==='Enter')saveGroup()">
+      </div>
+      <div class="col-auto" style="display:flex;align-items:flex-end;gap:6px">
+        <button class="btn btn-primary btn-sm" onclick="saveGroup()">Save</button>
+        <button class="btn btn-sm" onclick="toggleAddGroup()">Cancel</button>
+      </div>
+    </div>
+  </div>`;
+
+  groups.forEach(g=>{
+    const sgs=subGroups.filter(s=>s.gId===g.id);
+    const fAll=features.filter(f=>sgs.some(s=>s.id===f.sgId));
+    h+=`<div class="tree-group">
+      <div class="tree-group-hdr" onclick="toggle('g','${g.id}')">
+        <span class="chevron ${g.open?'open':''}">&#9654;</span>
+        <span class="tree-group-name">${esc(g.name)}</span>
+        <span class="tree-meta">${sgs.length} sub-groups &middot; ${fAll.length} features</span>
+        <button class="btn btn-dashed btn-sm" onclick="event.stopPropagation();toggleAdd('sg','${g.id}')" style="margin-left:8px">+ Sub-Group</button>
+        <button class="btn-icon" onclick="event.stopPropagation();deleteGroup('${g.id}')">&times;</button>
+      </div>
+      <div id="add-sg-${g.id}" class="add-panel" style="margin:8px 12px 0">
+        <div class="add-panel-title">New Sub-Group in ${esc(g.name)}</div>
+        <div class="row">
+          <div class="col"><label class="fl">Sub-Group Name</label>
+            <input class="fi" id="nsg-${g.id}" placeholder="e.g. Liquidity Ratios" onkeydown="if(event.key==='Enter')saveSG('${g.id}')">
+          </div>
+          <div class="col-auto" style="display:flex;align-items:flex-end;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="saveSG('${g.id}')">Save</button>
+            <button class="btn btn-sm" onclick="toggleAdd('sg','${g.id}')">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+    if(g.open){
+      h+=`<div class="tree-group-body">`;
+      if(!sgs.length) h+=`<div class="empty-state" style="padding:12px">No sub-groups yet.</div>`;
+      sgs.forEach(sg=>{
+        const feats=features.filter(f=>f.sgId===sg.id);
+        h+=`<div>
+          <div class="tree-sg-hdr" onclick="toggle('sg','${sg.id}')">
+            <span class="chevron ${sg.open?'open':''}">&#9654;</span>
+            <span class="tree-sg-name">${esc(sg.name)}</span>
+            <span class="tree-meta">${feats.length} feature${feats.length!==1?'s':''}</span>
+            <button class="btn btn-dashed btn-sm" onclick="event.stopPropagation();openAddFeat('${sg.id}')" style="margin-left:8px">+ Add Feature</button>
+            <button class="btn-icon" onclick="event.stopPropagation();deleteSG('${sg.id}')">&times;</button>
+          </div>
+          <div id="add-f-${sg.id}" class="add-panel" style="margin:6px 0 4px">
+            <div class="add-panel-title">Add Feature to ${esc(sg.name)}</div>
+            ${renderAddFeatForm(sg.id)}
+          </div>`;
+        if(sg.open){
+          h+=`<div class="tree-sg-body">`;
+          if(!feats.length) h+=`<div style="font-size:11px;color:#ccc;padding:6px 4px">No features added yet.</div>`;
+          feats.forEach(f=>{
+            const bc=bands.filter(b=>b.fId===f.id).length;
+            const maxSc=bc?Math.max(...bands.filter(b=>b.fId===f.id).map(b=>b.score)):'—';
+            const ddCount=f.dataType==='dropdown'?f.dropdownValues.length:null;
+            h+=`<div class="tree-feat">
+              <span class="tree-feat-name">${esc(f.displayName)}</span>
+              <span class="tag-table">${esc(f.sourceTable)}</span>
+              ${dtBadge(f.dataType)}
+              ${f.unit?`<span style="font-size:10px;color:#bbb">${esc(f.unit)}</span>`:''}
+              ${ddCount!==null?`<span style="font-size:10px;color:#00695c">${ddCount} values</span>`:''}
+              <span style="font-size:10px;color:#aaa">${bc} band${bc!==1?'s':''} &middot; max&nbsp;${maxSc}</span>
+              <button class="btn-icon" onclick="deleteFeat('${f.id}')">&times;</button>
+            </div>`;
+          });
+          h+=`</div>`;
+        }
+        h+=`</div>`;
+      });
+      h+=`</div>`;
+    }
+    h+=`</div>`;
+  });
+  document.getElementById('panel-features').innerHTML=h;
+}
+
+function renderAddFeatForm(sgId){
+  return `
+  <div class="step-row">
+    <span class="step-dot step-dot-active" id="sd1-${sgId}">1</span><span class="step-label step-label-active">Select Table</span>
+    <span style="color:#ddd;margin:0 4px">&#8594;</span>
+    <span class="step-dot step-dot-idle" id="sd2-${sgId}">2</span><span class="step-label" id="sl2-${sgId}">Select Field</span>
+    <span style="color:#ddd;margin:0 4px">&#8594;</span>
+    <span class="step-dot step-dot-idle" id="sd3-${sgId}">3</span><span class="step-label" id="sl3-${sgId}">Configure</span>
+  </div>
+  <div class="row">
+    <div class="col-auto">
+      <label class="fl">Source Table</label>
+      <select class="fsel" id="nf-tbl-${sgId}" onchange="onTableChange('${sgId}')" style="width:210px">
+        <option value="">— choose table —</option>
+        ${TABLES.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="col-auto" id="nf-field-wrap-${sgId}" style="display:none">
+      <label class="fl">Field / Feature</label>
+      <select class="fsel" id="nf-field-${sgId}" onchange="onFieldChange('${sgId}')" style="width:310px">
+        <option value="">— choose field —</option>
+      </select>
+    </div>
+  </div>
+  <div id="nf-config-${sgId}" style="display:none">
+    <div class="row">
+      <div class="col"><label class="fl">Display Name</label>
+        <input class="fi" id="nf-dname-${sgId}" placeholder="Human-readable label">
+      </div>
+      <div class="col-auto">
+        <label class="fl">Data Type</label>
+        <select class="fsel" id="nf-dtype-${sgId}" onchange="onDtypeChange('${sgId}')">
+          <option value="number">Numeric</option>
+          <option value="string">String (free text)</option>
+          <option value="dropdown">Dropdown (fixed values)</option>
+        </select>
+      </div>
+      <div class="col-auto" id="nf-unit-wrap-${sgId}">
+        <label class="fl">Unit</label>
+        <input class="fi" id="nf-unit-${sgId}" placeholder="%, x, ₹" style="width:70px">
+      </div>
+      <div class="col-auto" style="display:flex;align-items:flex-end;gap:6px">
+        <button class="btn btn-primary btn-sm" onclick="saveFeat('${sgId}')">Add Feature</button>
+        <button class="btn btn-sm" onclick="toggleAdd('f','${sgId}')">Cancel</button>
+      </div>
+    </div>
+    <div id="nf-dd-hint-${sgId}" style="display:none;font-size:11px;color:#00695c;background:#e0f2f1;border:1px solid #b2dfdb;border-radius:2px;padding:5px 9px;margin-top:-4px;margin-bottom:6px">
+      &#9432; Dropdown values can be added in the <b>Variables</b> tab after saving this feature.
+    </div>
+    <div id="nf-hint-${sgId}" style="font-size:10px;color:#aaa;margin-top:-4px"></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VARIABLES TAB
+// ═══════════════════════════════════════════════════════════════
+function renderVars(){
+  const q=varSearch.toLowerCase();
+  const filtered=features.filter(f=>{
+    if(varFilter&&f.sourceTable!==varFilter) return false;
+    if(q){
+      const sg=getSG(f),g=getG(f);
+      return (f.displayName+f.catalogField+f.sourceTable+(g?.name||'')+(sg?.name||'')).toLowerCase().includes(q);
+    }
+    return true;
+  });
+  const tableOpts=TABLES.filter(t=>features.some(f=>f.sourceTable===t));
+
+  let h=`
+  <div class="var-toolbar">
+    <div class="section-title">All Configured Variables <span class="var-count-badge">${features.length}</span></div>
+    <input class="search-box" placeholder="Search…" value="${esc(varSearch)}" oninput="varSearch=this.value;renderVars()">
+    <select class="fsel" onchange="varFilter=this.value;renderVars()">
+      <option value="">All tables</option>
+      ${tableOpts.map(t=>`<option value="${esc(t)}" ${varFilter===t?'selected':''}>${esc(t)}</option>`).join('')}
+    </select>
+    <span style="font-size:11px;color:#999">${filtered.length} of ${features.length} shown</span>
+  </div>`;
+
+  if(!features.length){
+    h+=`<div class="empty-state">No features configured yet. Go to Features tab.</div>`;
+  } else {
+    h+=`<table class="var-tbl">
+      <thead><tr>
+        <th>#</th><th>Display Name</th><th>DB Field</th><th>Source Table</th>
+        <th>Catalog Category</th><th>Catalog Sub-Cat</th>
+        <th>Engine Group</th><th>Engine Sub-Group</th>
+        <th>Type</th><th>Unit</th><th>Bands</th><th>Dropdown Values</th>
+      </tr></thead>
+      <tbody>`;
+
+    filtered.forEach((f,i)=>{
+      const sg=getSG(f),g=getG(f);
+      const cat=CATALOG.find(c=>c.table===f.sourceTable&&c.field===f.catalogField);
+      const bc=bands.filter(b=>b.fId===f.id).length;
+      const isDD=f.dataType==='dropdown';
+      const isExpanded=expandedVarId===f.id;
+
+      h+=`<tr class="main-row ${isExpanded&&isDD?'dd-expanded':''}">
+        <td style="color:#aaa">${i+1}</td>
+        <td style="font-weight:600;color:#1a3c6e">${esc(f.displayName)}</td>
+        <td style="font-family:monospace;font-size:11px;color:#444">${esc(f.catalogField)}</td>
+        <td><span class="tag-table">${esc(f.sourceTable)}</span></td>
+        <td style="color:#555">${esc(cat?.catName||'—')}</td>
+        <td style="color:#777">${esc(cat?.subCatName||'—')}</td>
+        <td style="color:#555">${esc(g?.name||'—')}</td>
+        <td style="color:#777">${esc(sg?.name||'—')}</td>
+        <td>${dtBadge(f.dataType)}</td>
+        <td style="color:#aaa">${esc(f.unit||'—')}</td>
+        <td style="text-align:center">${bc?`<b style="color:#1a3c6e">${bc}</b>`:`<span style="color:#ddd">0</span>`}</td>
+        <td>
+          ${isDD
+            ? `<button class="btn btn-sm ${isExpanded?'btn-teal':'btn-dashed'}" onclick="toggleVarExpand('${f.id}')" style="white-space:nowrap">
+                ${isExpanded?'&#9660; Close':'&#9654; Manage Values'}
+                <span style="margin-left:4px;font-weight:bold">(${f.dropdownValues.length})</span>
+              </button>`
+            : `<span style="color:#ddd;font-size:11px">—</span>`
+          }
+        </td>
+      </tr>`;
+
+      // expanded values management row
+      if(isDD&&isExpanded){
+        h+=`<tr class="dd-expand-row">
+          <td colspan="12">
+            <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+              <div style="flex:1;min-width:260px">
+                <div style="font-size:10px;font-weight:700;color:#00695c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">
+                  Dropdown Values for &ldquo;${esc(f.displayName)}&rdquo;
+                </div>
+                <div class="dd-chips-row" id="dd-chips-${f.id}">
+                  ${f.dropdownValues.length
+                    ? f.dropdownValues.map((v,vi)=>`<span class="dd-chip">${esc(v)}<button class="dd-chip-del" onclick="removeDropdownValue('${f.id}',${vi})" title="Remove">&times;</button></span>`).join('')
+                    : `<span class="dd-empty">No values yet. Add values on the right.</span>`
+                  }
+                </div>
+                ${f.dropdownValues.length
+                  ? `<div style="font-size:10px;color:#aaa;margin-top:7px">Score bands in Score Rules tab will use these values as a dropdown.</div>`
+                  : ''
+                }
+              </div>
+              <div style="flex-shrink:0;display:flex;gap:6px;align-items:flex-end">
+                <div>
+                  <label class="fl" style="color:#00695c">Add Value</label>
+                  <input class="fi" id="dd-new-val-${f.id}" placeholder="e.g. Proprietorship" style="width:180px"
+                    onkeydown="if(event.key==='Enter')addDropdownValue('${f.id}')">
+                </div>
+                <button class="btn btn-teal btn-sm" onclick="addDropdownValue('${f.id}')">+ Add</button>
+              </div>
+            </div>
+          </td>
+        </tr>`;
+      }
+    });
+    h+=`</tbody></table>`;
+  }
+  document.getElementById('panel-vars').innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCORE RULES TAB
+// ═══════════════════════════════════════════════════════════════
+let rbGroup='', rbSubGroup='', rbFeat='', rbOp='>=';
+
+function renderRules(){
+  const availSGs   = rbGroup    ? subGroups.filter(s=>s.gId===rbGroup) : [];
+  const availFeats = rbSubGroup ? features.filter(f=>f.sgId===rbSubGroup) : [];
+  const selFeat    = rbFeat     ? getFeat(rbFeat) : null;
+
+  const tableGroupId = rbGroup;
+  const tableSGIds   = tableGroupId ? subGroups.filter(s=>s.gId===tableGroupId).map(s=>s.id) : subGroups.map(s=>s.id);
+  const tableFeatIds = features.filter(f=>tableSGIds.includes(f.sgId)).map(f=>f.id);
+  const tableBands   = bands.filter(b=>tableFeatIds.includes(b.fId));
+  const activeGrpName= tableGroupId ? (groups.find(g=>g.id===tableGroupId)?.name||'') : 'All';
+
+  const usedDDVals  = selFeat ? bands.filter(b=>b.fId===selFeat.id).map(b=>String(b.v1).toLowerCase()) : [];
+  const availDDVals = (selFeat&&selFeat.dataType==='dropdown') ? selFeat.dropdownValues.filter(v=>!usedDDVals.includes(v.toLowerCase())) : [];
+  const ddNoValues  = selFeat&&selFeat.dataType==='dropdown'&&!selFeat.dropdownValues.length;
+  const ddAllUsed   = selFeat&&selFeat.dataType==='dropdown'&&selFeat.dropdownValues.length>0&&availDDVals.length===0;
+  const isDD  = !!(selFeat&&selFeat.dataType==='dropdown');
+  const isStr = !!(selFeat&&selFeat.dataType==='string');
+  const canAdd = !!(selFeat && !(isDD&&(ddNoValues||ddAllUsed)));
+
+  // ── STEPPER ──
+  const steps=[{n:1,l:'Rules Builder'},{n:2,l:'Weights'},{n:3,l:'Classification'},{n:4,l:'Overrides'},{n:5,l:'Simulator'}];
+  let html = '<div class="rb-wrap">';
+  html += '<div class="rb-stepper">';
+  steps.forEach((s,i)=>{
+    const active = s.n===1;
+    html += '<div class="rb-step">';
+    html += `<div class="rb-step-circle${active?' active':''}">${active?s.n:'&#9675;'}</div>`;
+    html += `<span class="rb-step-label${active?' active':''}">${s.n}. ${s.l}</span>`;
+    html += '</div>';
+    if(i<steps.length-1) html += '<div class="rb-step-line"></div>';
+  });
+  html += '</div>';
+
+  // ── FORM CARD ──
+  html += '<div style="padding:0 24px 24px">';
+  html += '<div class="rb-card"><div class="rb-form-row">';
+
+  // Category
+  html += '<div class="rb-field" style="flex:1;min-width:120px">';
+  html += '<span class="rb-label">Category</span>';
+  html += `<select class="rb-select" onchange="rbGroup=this.value;rbSubGroup='';rbFeat='';rbOp='>=';renderRules()">`;
+  html += '<option value="">— Category —</option>';
+  groups.filter(g=>features.some(f=>subGroups.filter(s=>s.gId===g.id).some(s=>s.id===f.sgId))).forEach(g=>{
+    html += `<option value="${esc(g.id)}"${rbGroup===g.id?' selected':''}>${esc(g.name)}</option>`;
+  });
+  html += '</select></div>';
+
+  // Sub-Category
+  html += `<div class="rb-field" style="flex:1;min-width:120px">`;
+  html += '<span class="rb-label">Sub-Category</span>';
+  html += `<select class="rb-select" onchange="rbSubGroup=this.value;rbFeat='';rbOp='>=';renderRules()"${!rbGroup?' disabled':''}>`;
+  html += '<option value="">— Sub-Category —</option>';
+  availSGs.filter(sg=>features.some(f=>f.sgId===sg.id)).forEach(sg=>{
+    html += `<option value="${esc(sg.id)}"${rbSubGroup===sg.id?' selected':''}>${esc(sg.name)}</option>`;
+  });
+  html += '</select></div>';
+
+  // Feature
+  html += `<div class="rb-field" style="flex:1.2;min-width:130px">`;
+  html += '<span class="rb-label">Feature</span>';
+  html += `<select class="rb-select" onchange="rbFeat=this.value;rbOp='>=';renderRules()"${!rbSubGroup?' disabled':''}>`;
+  html += '<option value="">— Feature —</option>';
+  availFeats.forEach(f=>{
+    html += `<option value="${esc(f.id)}"${rbFeat===f.id?' selected':''}>${esc(f.displayName)}</option>`;
+  });
+  html += '</select></div>';
+
+  // Operator
+  html += '<div class="rb-field" style="width:160px;flex-shrink:0">';
+  html += '<span class="rb-label">Operator</span>';
+  if(isDD||isStr){
+    html += '<div class="rb-op-locked"><span style="font-family:monospace;font-size:15px;font-weight:700;color:#1a3c6e">==</span><span style="font-size:11px;color:#aaa;margin-left:6px">Equals</span></div>';
+  } else {
+    const fid = selFeat ? selFeat.id : 'x';
+    html += `<select class="rb-select" id="nb-op-${fid}" onchange="rbOp=this.value;renderRules()">`;
+    html += `<option value=">="${rbOp==='>='?' selected':''}>\u2265 Greater or equal</option>`;
+    html += `<option value=">"${rbOp==='>'?' selected':''}>&gt; Greater than</option>`;
+    html += `<option value="<="${rbOp==='<='?' selected':''}>\u2264 Less or equal</option>`;
+    html += `<option value="<"${rbOp==='<'?' selected':''}>&lt; Less than</option>`;
+    html += `<option value="between"${rbOp==='between'?' selected':''}>Between (inclusive)</option>`;
+    html += `<option value="=="${rbOp==='=='?' selected':''}>= Exactly equal</option>`;
+    html += '</select>';
+  }
+  html += '</div>';
+
+  // Value
+  const unitLabel = selFeat?.unit ? ' ('+selFeat.unit+')' : '';
+  const fid = selFeat ? selFeat.id : 'x';
+  html += `<div class="rb-field" style="flex:1;min-width:120px">`;
+  html += `<span class="rb-label">Value${esc(unitLabel)}</span>`;
+  if(isDD){
+    if(ddNoValues){
+      html += '<div class="rb-op-locked" style="background:#fff8e1;border-color:#ffe082;color:#aaa;font-size:11px">&#9888; No values — add in Variables tab</div>';
+    } else if(ddAllUsed){
+      html += '<div class="rb-op-locked" style="background:#e8f5e9;border-color:#a5d6a7;color:#2e7d32;font-size:11px">&#10003; All values scored</div>';
+    } else {
+      html += `<select class="rb-select" id="nb-val-${fid}"><option value="">— select —</option>`;
+      availDDVals.forEach(v=>{ html += `<option value="${esc(v)}">${esc(v)}</option>`; });
+      html += '</select>';
+    }
+  } else if(isStr){
+    html += `<input class="rb-input" id="nb-val-${fid}" placeholder="Enter exact value">`;
+  } else {
+    const ph = rbOp==='between' ? 'Min' : 'e.g. 10';
+    html += `<input class="rb-input" id="nb-v1-${fid}" type="number" placeholder="${ph}">`;
+  }
+  html += '</div>';
+
+  // Max (between only, numeric)
+  if(!isDD&&!isStr&&rbOp==='between'){
+    html += `<div class="rb-field" style="width:100px;flex-shrink:0">`;
+    html += `<span class="rb-label">Max${esc(unitLabel)}</span>`;
+    html += `<input class="rb-input" id="nb-v2-${fid}" type="number" placeholder="Max">`;
+    html += '</div>';
+  }
+
+  // Score
+  html += '<div class="rb-field" style="width:90px;flex-shrink:0">';
+  html += '<span class="rb-label">Score (1–10)</span>';
+  html += `<input class="rb-input" id="nb-score-${fid}" type="number" min="1" max="10" value="5"${!canAdd?' disabled':''}>`;
+  html += '</div>';
+
+  // Add button
+  html += '<div class="rb-field" style="flex-shrink:0;justify-content:flex-end">';
+  html += `<button class="rb-btn-add" onclick="saveBandRB()"${!canAdd?' disabled':''}>Add Rule</button>`;
+  html += '</div>';
+
+  html += '</div></div>'; // rb-form-row, rb-card
+
+  // ── ACTIVE RULES TABLE ──
+  html += `<div class="rb-active-lbl">Active Rules for: <span>${esc(activeGrpName)}</span></div>`;
+
+  // filter pills
+  const grpsWithBands = groups.filter(g=>{
+    const sgIds = subGroups.filter(s=>s.gId===g.id).map(s=>s.id);
+    const fIds  = features.filter(f=>sgIds.includes(f.sgId)).map(f=>f.id);
+    return bands.some(b=>fIds.includes(b.fId));
+  });
+  if(grpsWithBands.length>1){
+    html += '<div class="rb-filter-row">';
+    html += `<button class="rb-ftab${!rbGroup?' active':''}" onclick="rbGroup='';rbSubGroup='';rbFeat='';renderRules()">All</button>`;
+    grpsWithBands.forEach(g=>{
+      html += `<button class="rb-ftab${rbGroup===g.id?' active':''}" onclick="rbGroup='${g.id}';rbSubGroup='';rbFeat='';renderRules()">${esc(g.name)}</button>`;
+    });
+    html += '</div>';
+  }
+
+  html += '<table class="rb-tbl"><thead><tr>';
+  html += '<th>Category</th><th>Sub-Category</th><th>Feature</th><th>Condition</th><th>Score</th><th>Action</th>';
+  html += '</tr></thead><tbody>';
+  if(!tableBands.length){
+    html += '<tr><td colspan="6" class="rb-empty-tbl">No rules yet. Use the form above to add rules.</td></tr>';
+  } else {
+    tableBands.forEach(b=>{
+      const f  = getFeat(b.fId);
+      const sg = getSG(f), g = getG(f);
+      const scCl = b.score>=7?'rb-sc-hi':b.score>=4?'rb-sc-mid':'rb-sc-lo';
+      html += '<tr>';
+      html += `<td style="color:#555">${esc(g?.name||'—')}</td>`;
+      html += `<td style="color:#777">${esc(sg?.name||'—')}</td>`;
+      html += `<td style="font-weight:600;color:#1a3c6e">${esc(f?.displayName||'—')}</td>`;
+      html += `<td><span class="rb-cond">${esc(fmtBand(b,f||{}))}</span></td>`;
+      html += `<td><span class="rb-score-pill ${scCl}">${b.score}</span></td>`;
+      html += `<td><button class="rb-del-btn" onclick="deleteBand('${b.id}')">&times;</button></td>`;
+      html += '</tr>';
+    });
+  }
+  html += '</tbody></table>';
+
+  html += '<div class="rb-nav-row" style="margin-top:16px"><button class="rb-btn-next" onclick="switchTabById(\'weights\')">Next &rarr;</button></div>';
+  html += '</div></div>'; // padding div, rb-wrap
+
+  document.getElementById('panel-rules').innerHTML = html;
+}
+
+function saveBandRB(){
+  if(!rbFeat) return alert('Please select a feature.');
+  const f=getFeat(rbFeat);
+  const score=parseInt(document.getElementById('nb-score-'+f.id)?.value)||5;
+  if(score<1||score>10) return alert('Score must be 1–10.');
+
+  if(f.dataType==='dropdown'||f.dataType==='string'){
+    const el=document.getElementById('nb-val-'+f.id);
+    const v1=(el?.value||'').trim();
+    if(!v1) return alert('Please select/enter a value.');
+    if(f.dataType==='dropdown'&&bands.some(b=>b.fId===f.id&&b.v1.toLowerCase()===v1.toLowerCase()))
+      return alert('A band for this value already exists.');
+    bands.push({id:uid(),fId:f.id,condType:'exact',op:'==',v1,v2:null,score});
+  } else {
+    const op=rbOp;
+    const v1=parseFloat(document.getElementById('nb-v1-'+f.id)?.value);
+    if(isNaN(v1)) return alert('Value is required.');
+    let v2=null;
+    if(op==='between'){
+      v2=parseFloat(document.getElementById('nb-v2-'+f.id)?.value);
+      if(isNaN(v2)) return alert('Max value is required for between.');
+      if(v2<=v1)    return alert('Max must be greater than Min.');
+    }
+    bands.push({id:uid(),fId:f.id,condType:'range',op,v1,v2,score});
+  }
+  renderRules();
+}
+
+function selectFeat(id){rbFeat=id;renderRules();}
+function onOpChange(fId){
+  const op=document.getElementById('nb-op-'+fId)?.value;
+  rbOp=op||'>=';
+  renderRules();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WEIGHTS
+// ═══════════════════════════════════════════════════════════════
+// catWeights:  { [gId]: rawWeight }
+// sgWeights:   { [sgId]: rawWeight }
+let catWeights = {};
+let sgWeights  = {};
+
+function getCatRaw(gId)  { return parseFloat(catWeights[gId])||0; }
+function getSgRaw(sgId)  { return parseFloat(sgWeights[sgId])||0; }
+
+// normalised % of a category = its raw / sum of all cats with bands
+function normCat(gId){
+  const grpsWithBands = activeGroups();
+  const total = grpsWithBands.reduce((s,g)=>s+getCatRaw(g.id),0);
+  return total===0 ? 0 : getCatRaw(gId)/total*100;
+}
+// normalised % of a sub-cat within its category
+function normSg(sgId){
+  const sg = subGroups.find(s=>s.id===sgId);
+  if(!sg) return 0;
+  const sibs = activeSubGroups(sg.gId);
+  const total = sibs.reduce((s,x)=>s+getSgRaw(x.id),0);
+  return total===0 ? 0 : getSgRaw(sgId)/total*100;
+}
+// effective weight of a sub-cat = normCat * normSg / 100
+function effectiveWeight(sgId){
+  const sg = subGroups.find(s=>s.id===sgId);
+  if(!sg) return 0;
+  return normCat(sg.gId) * normSg(sgId) / 100;
+}
+
+function activeGroups(){
+  return groups.filter(g=>{
+    const sgIds = subGroups.filter(s=>s.gId===g.id).map(s=>s.id);
+    return features.some(f=>sgIds.includes(f.sgId));
+  });
+}
+function activeSubGroups(gId){
+  return subGroups.filter(sg=>sg.gId===gId&&features.some(f=>f.sgId===sg.id));
+}
+
+function updateCatWeight(gId, val){
+  catWeights[gId] = parseFloat(val)||0;
+  renderWeights();
+}
+function updateSgWeight(sgId, val){
+  sgWeights[sgId] = parseFloat(val)||0;
+  renderWeights();
+}
+
+function renderWeights(){
+  const aGroups = activeGroups();
+  const catTotal = aGroups.reduce((s,g)=>s+getCatRaw(g.id),0);
+
+  let html = '<div style="max-width:900px">';
+
+  // ── SECTION 1: Category weights ──
+  html += '<div class="wt-section">';
+  html += '<div class="wt-section-title">Section 1 &mdash; Category Weights';
+  html += '<span class="wt-note" style="font-weight:400;text-transform:none;font-size:11px;letter-spacing:0">Assign a raw weight to each category. Normalised % is computed automatically.</span>';
+  html += '</div>';
+
+  if(!aGroups.length){
+    html += '<div class="empty-state">No categories with features yet.</div>';
+  } else {
+    html += '<table class="wt-tbl"><thead><tr><th>Category</th><th>Raw Weight</th><th>Normalised %</th></tr></thead><tbody>';
+    aGroups.forEach(g=>{
+      const raw  = getCatRaw(g.id);
+      const norm = normCat(g.id);
+      html += `<tr>
+        <td style="font-weight:600;color:#1a3c6e">${esc(g.name)}</td>
+        <td><input class="wt-input" type="number" min="0" value="${raw||''}" placeholder="e.g. 30"
+            oninput="updateCatWeight('${g.id}',this.value)"></td>
+        <td><span class="wt-norm ${catTotal>0?'wt-norm-ok':''}">${catTotal>0?norm.toFixed(2)+'%':'—'}</span></td>
+      </tr>`;
+    });
+    // sum row
+    html += `<tr class="wt-sum-row">
+      <td>Total</td>
+      <td style="color:#1a3c6e">${catTotal}</td>
+      <td><span class="wt-norm ${catTotal>0?'wt-norm-ok':''}">${catTotal>0?'100.00%':'—'}</span></td>
+    </tr>`;
+    html += '</tbody></table>';
+    html += '<div class="wt-note">Effective score = Feature Score &times; Sub-Category Normalised Weight &times; Category Normalised Weight / 100</div>';
+  }
+  html += '</div>';
+
+  // ── SECTION 2: Sub-Category weights (per category) ──
+  html += '<div class="wt-section">';
+  html += '<div class="wt-section-title">Section 2 &mdash; Sub-Category Weights';
+  html += '<span class="wt-note" style="font-weight:400;text-transform:none;font-size:11px;letter-spacing:0">Within each category, sub-category normalised weights must sum to 100%.</span>';
+  html += '</div>';
+
+  aGroups.forEach(g=>{
+    const aSGs  = activeSubGroups(g.id);
+    const sgTot = aSGs.reduce((s,sg)=>s+getSgRaw(sg.id),0);
+    const allOk = Math.abs(aSGs.reduce((s,sg)=>s+normSg(sg.id),0)-100)<0.01 && aSGs.length>0 && sgTot>0;
+
+    html += '<div class="wt-sg-card">';
+    html += `<div class="wt-sg-card-hdr">
+      ${esc(g.name)}
+      <span class="wt-badge ${allOk?'wt-badge-ok':'wt-badge-warn'}">${allOk?'✓ Balanced':'⚠ Unbalanced'}</span>
+      <span style="font-size:11px;color:#aaa;font-weight:400;margin-left:auto">Sum of normalised = ${sgTot>0?aSGs.reduce((s,sg)=>s+normSg(sg.id),0).toFixed(2):'0'}%</span>
+    </div>`;
+
+    html += '<table class="wt-tbl"><thead><tr><th>Sub-Category</th><th>Features</th><th>Raw Weight</th><th>Normalised %</th><th>Effective Weight</th></tr></thead><tbody>';
+    aSGs.forEach(sg=>{
+      const raw   = getSgRaw(sg.id);
+      const norm  = normSg(sg.id);
+      const eff   = effectiveWeight(sg.id);
+      const fCount= features.filter(f=>f.sgId===sg.id).length;
+      html += `<tr>
+        <td style="font-weight:600;color:#333">${esc(sg.name)}</td>
+        <td style="color:#aaa">${fCount}</td>
+        <td><input class="wt-input" type="number" min="0" value="${raw||''}" placeholder="e.g. 20"
+            oninput="updateSgWeight('${sg.id}',this.value)"></td>
+        <td><span class="wt-norm ${sgTot>0?'wt-norm-ok':''}">${sgTot>0?norm.toFixed(2)+'%':'—'}</span></td>
+        <td><span class="wt-norm" style="color:#555">${catTotal>0&&sgTot>0?eff.toFixed(2)+'%':'—'}</span></td>
+      </tr>`;
+    });
+    // sum row for sg
+    html += `<tr class="wt-sum-row">
+      <td>Total</td><td></td>
+      <td style="color:#1a3c6e">${sgTot}</td>
+      <td><span class="wt-norm ${allOk?'wt-norm-ok':'wt-norm-warn'}">${sgTot>0?aSGs.reduce((s,sg)=>s+normSg(sg.id),0).toFixed(2)+'%':'—'}</span></td>
+      <td><span class="wt-norm" style="color:#555">${catTotal>0&&sgTot>0?aSGs.reduce((s,sg)=>s+effectiveWeight(sg.id),0).toFixed(2)+'%':'—'}</span></td>
+    </tr>`;
+    html += '</tbody></table></div>';
+  });
+
+  // ── Grand total effective weight ──
+  const allSGs = aGroups.flatMap(g=>activeSubGroups(g.id));
+  const grandEff = allSGs.reduce((s,sg)=>s+effectiveWeight(sg.id),0);
+  const grandOk  = catTotal>0 && aGroups.every(g=>activeSubGroups(g.id).reduce((s,sg)=>s+getSgRaw(sg.id),0)>0) && Math.abs(grandEff-100)<0.1;
+  if(allSGs.length){
+    html += `<div style="display:flex;align-items:center;gap:14px;padding:12px 18px;background:${grandOk?'#e8f5e9':'#fff3e0'};border:1.5px solid ${grandOk?'#a5d6a7':'#ffcc80'};border-radius:8px;margin-top:4px">
+      <span style="font-size:13px;font-weight:700;color:#333">Grand Total — Effective Weight (all sub-categories)</span>
+      <span style="font-size:20px;font-weight:800;color:${grandOk?'#2e7d32':'#e65100'};margin-left:auto">${catTotal>0&&allSGs.some(sg=>getSgRaw(sg.id)>0)?grandEff.toFixed(2)+'%':'—'}</span>
+      <span class="wt-badge ${grandOk?'wt-badge-ok':'wt-badge-warn'}">${grandOk?'✓ 100%':'⚠ Not 100%'}</span>
+    </div>`;
+  }
+  html += '</div>';
+
+  // nav
+  html += '<div style="display:flex;justify-content:space-between;margin-top:8px">';
+  html += '<button class="rb-btn-next" style="background:#aaa" onclick="switchTabById(\'rules\')">&#8592; Back</button>';
+  html += '<button class="rb-btn-next" onclick="switchTabById(\'simulate\')">Next &#8594;</button>';
+  html += '</div>';
+
+  html += '</div>';
+  document.getElementById('panel-weights').innerHTML = html;
+}
+
+function switchTabById(id){
+  const btn = document.querySelector(`.tab[onclick*="'${id}'"]`);
+  if(btn) switchTab(id, btn);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIMULATE TAB
+// ═══════════════════════════════════════════════════════════════
+function renderSimulate(){
+  let inputH='';
+  groups.forEach(g=>{
+    const sgs=subGroups.filter(s=>s.gId===g.id);
+    const gFs=features.filter(f=>sgs.some(s=>s.id===f.sgId));
+    if(!gFs.length) return;
+    inputH+=`<div class="sim-group"><div class="sim-group-hdr">${esc(g.name)}</div>`;
+    sgs.forEach(sg=>{
+      const feats=features.filter(f=>f.sgId===sg.id);
+      if(!feats.length) return;
+      inputH+=`<div class="sim-sg-hdr">${esc(sg.name)}</div>`;
+      feats.forEach(f=>{
+        let inputEl='';
+        if(f.dataType==='dropdown'){
+          inputEl=`<select class="fsel" id="sv-${f.id}" onchange="simulate()" style="width:180px">
+            <option value="">— select —</option>
+            ${f.dropdownValues.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('')}
+          </select>`;
+        } else {
+          inputEl=`<input class="fi" id="sv-${f.id}" type="${f.dataType==='string'?'text':'number'}"
+            placeholder="${f.dataType==='string'?'value':'0'}" oninput="simulate()" style="width:130px">`;
+        }
+        inputH+=`<div class="sim-feat-row">
+          <span class="sim-feat-label" title="${esc(f.catalogField)}">${esc(f.displayName)}</span>
+          ${inputEl}
+          <span class="sim-feat-match" id="sm-${f.id}"></span>
+        </div>`;
+      });
+    });
+    inputH+=`</div>`;
+  });
+
+  document.getElementById('panel-simulate').innerHTML=`
+  <div class="sim-layout">
+    <div class="sim-inputs">
+      <div class="section-hdr" style="margin-bottom:12px">
+        <div class="section-title">Input Values</div>
+        <button class="btn btn-sm" onclick="clearSim()">Clear All</button>
+      </div>
+      ${inputH||'<div class="empty-state">No features configured yet.</div>'}
+    </div>
+    <div class="sim-results">
+      <div class="section-title" style="margin-bottom:10px">Score Output</div>
+      <div class="result-card">
+        <div class="result-card-hdr">Score Summary</div>
+        <div class="result-metrics">
+          <div class="result-metric"><span class="result-metric-val" id="res-total">—</span><span class="result-metric-lbl">Total Score</span></div>
+          <div class="result-metric"><span class="result-metric-val" id="res-hits">—</span><span class="result-metric-lbl">Features Hit</span></div>
+          <div class="result-metric"><span class="result-metric-val" id="res-max">—</span><span class="result-metric-lbl">Max Possible</span></div>
+        </div>
+        <div class="score-prog-wrap">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa;margin-bottom:3px">
+            <span>Score %</span><span id="res-pct">—</span>
+          </div>
+          <div class="score-prog"><div class="score-prog-bar" id="res-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="result-card">
+        <div class="result-card-hdr">Feature Breakdown</div>
+        <table class="res-table">
+          <thead><tr><th>Feature</th><th>Value</th><th>Band</th><th>Score</th></tr></thead>
+          <tbody id="res-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+  simulate();
+}
+
+function simulate(){
+  let total=0,hits=0,maxPoss=0;
+  const rows=[];
+  features.forEach(f=>{
+    const fb=bands.filter(b=>b.fId===f.id);
+    maxPoss+=fb.length?Math.max(...fb.map(b=>b.score)):0;
+    const el=document.getElementById('sv-'+f.id);
+    if(!el) return;
+    const raw=el.value;
+    let matched=null;
+    if(raw.trim()!=='') for(const b of fb) if(evalBand(b,raw,f.dataType)){matched=b;break;}
+    rows.push({f,raw,matched});
+    const mel=document.getElementById('sm-'+f.id);
+    if(mel) mel.innerHTML=raw.trim()===''?'':matched
+      ?`<span class="match-badge match-hit">Score ${matched.score}</span>`
+      :`<span class="match-badge match-miss">No match</span>`;
+    if(matched){total+=matched.score;hits++;}
+  });
+  const q=id=>document.getElementById(id);
+  if(q('res-total')) q('res-total').textContent=total||'0';
+  if(q('res-hits'))  q('res-hits').textContent=hits;
+  if(q('res-max'))   q('res-max').textContent=maxPoss;
+  const pct=maxPoss>0?Math.round(total/maxPoss*100):0;
+  if(q('res-pct')) q('res-pct').textContent=maxPoss>0?pct+'%':'—';
+  if(q('res-bar')){q('res-bar').style.width=pct+'%';q('res-bar').style.background=pct>=70?'#2e7d32':pct>=40?'#e65100':'#c62828';}
+  const tbody=q('res-tbody');
+  if(tbody) tbody.innerHTML=rows.map(({f,raw,matched})=>`
+    <tr class="${matched?'hit':''}">
+      <td><div style="font-weight:600">${esc(f.displayName)}</div><div style="font-size:9px;color:#bbb">${esc(getG(f)?.name||'')} / ${esc(getSG(f)?.name||'')}</div></td>
+      <td style="font-family:monospace;font-size:11px">${raw===''?'<span style="color:#ddd">—</span>':esc(raw)}</td>
+      <td style="font-family:monospace;font-size:10px">${matched?esc(fmtBand(matched,f)):'<span style="color:#ddd">—</span>'}</td>
+      <td>${matched?`<span class="${chipCls(matched.score)}">${matched.score}</span>`:'<span style="color:#ddd">—</span>'}</td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  if(id==='features') renderFeatures();
+  if(id==='vars')     renderVars();
+  if(id==='rules')    renderRules();
+  if(id==='weights')  renderWeights();
+  if(id==='simulate') renderSimulate();
+}
+function renderCurrent(){
+  if(document.getElementById('panel-features').classList.contains('active')) renderFeatures();
+  if(document.getElementById('panel-vars').classList.contains('active'))     renderVars();
+  if(document.getElementById('panel-rules').classList.contains('active'))    renderRules();
+  if(document.getElementById('panel-weights').classList.contains('active'))  renderWeights();
+  if(document.getElementById('panel-simulate').classList.contains('active')) renderSimulate();
+}
+function toggle(type,id){
+  const arr=type==='g'?groups:subGroups;
+  const item=arr.find(x=>x.id===id);
+  if(item) item.open=!item.open;
+  renderCurrent();
+}
+function toggleAdd(type,id){
+  const el=document.getElementById(`add-${type}-${id}`);
+  if(!el) return;
+  el.classList.toggle('open');
+  const inp=el.querySelector('input,select');
+  if(inp&&el.classList.contains('open')) setTimeout(()=>inp.focus(),60);
+}
+function toggleAddGroup(){
+  const el=document.getElementById('add-group-panel');
+  if(!el) return;
+  el.classList.toggle('open');
+  const inp=document.getElementById('ng-name');
+  if(inp&&el.classList.contains('open')) setTimeout(()=>inp.focus(),60);
+}
+function openAddFeat(sgId){
+  document.querySelectorAll('[id^="add-f-"]').forEach(el=>{if(el.id!=='add-f-'+sgId)el.classList.remove('open');});
+  toggleAdd('f',sgId);
+}
+function selectFeat(id){selectedFeatId=id;renderRules();}
+function onOpChange(fId){
+  const op=document.getElementById('nb-op-'+fId)?.value;
+  const w=document.getElementById('nb-v2w-'+fId);
+  if(w) w.style.display=op==='between'?'':'none';
+}
+function onTableChange(sgId){
+  const tbl=document.getElementById('nf-tbl-'+sgId)?.value;
+  const fw=document.getElementById('nf-field-wrap-'+sgId);
+  const fc=document.getElementById('nf-config-'+sgId);
+  const sd2=document.getElementById('sd2-'+sgId);
+  const sl2=document.getElementById('sl2-'+sgId);
+  if(!tbl){fw&&(fw.style.display='none');fc&&(fc.style.display='none');return;}
+  const fields=catalogByTable(tbl);
+  const fsel=document.getElementById('nf-field-'+sgId);
+  fsel.innerHTML=`<option value="">— choose field —</option>`+
+    fields.map(c=>{
+      const used=alreadyAdded(tbl,c.field);
+      return `<option value="${esc(c.field)}" ${used?'disabled style="color:#ccc"':''}>${esc(c.field)}${used?' (added)':''} [${c.subCatName}]</option>`;
+    }).join('');
+  fw.style.display='';
+  fc.style.display='none';
+  if(sd2) sd2.className='step-dot step-dot-active';
+  if(sl2) sl2.className='step-label step-label-active';
+  setTimeout(()=>fsel.focus(),50);
+}
+function onFieldChange(sgId){
+  const tbl=document.getElementById('nf-tbl-'+sgId)?.value;
+  const field=document.getElementById('nf-field-'+sgId)?.value;
+  const fc=document.getElementById('nf-config-'+sgId);
+  const sd3=document.getElementById('sd3-'+sgId);
+  const sl3=document.getElementById('sl3-'+sgId);
+  if(!field){fc&&(fc.style.display='none');return;}
+  const cat=CATALOG.find(c=>c.table===tbl&&c.field===field);
+  fc.style.display='';
+  if(sd3) sd3.className='step-dot step-dot-active';
+  if(sl3) sl3.className='step-label step-label-active';
+  const dn=document.getElementById('nf-dname-'+sgId);
+  if(dn) dn.value=field;
+  const dt=document.getElementById('nf-dtype-'+sgId);
+  if(dt){ dt.value=cat?.defaultType||'number'; onDtypeChange(sgId); }
+  const hint=document.getElementById('nf-hint-'+sgId);
+  if(hint&&cat) hint.innerHTML=`Catalog: ${esc(cat.catName)} &rsaquo; ${esc(cat.subCatName)}`;
+}
+function onDtypeChange(sgId){
+  const dt=document.getElementById('nf-dtype-'+sgId)?.value;
+  const unitWrap=document.getElementById('nf-unit-wrap-'+sgId);
+  const ddHint=document.getElementById('nf-dd-hint-'+sgId);
+  if(unitWrap)  unitWrap.style.display = dt==='dropdown'?'none':'';
+  if(ddHint)    ddHint.style.display   = dt==='dropdown'?'':'none';
+}
+
+// dropdown value management in Variables tab
+function toggleVarExpand(fId){
+  expandedVarId = expandedVarId===fId ? null : fId;
+  renderVars();
+  if(expandedVarId===fId) setTimeout(()=>{const el=document.getElementById('dd-new-val-'+fId);if(el)el.focus();},80);
+}
+function addDropdownValue(fId){
+  const f=getFeat(fId);
+  const el=document.getElementById('dd-new-val-'+fId);
+  if(!el) return;
+  const val=el.value.trim();
+  if(!val) return;
+  if(f.dropdownValues.some(v=>v.toLowerCase()===val.toLowerCase())) return alert('Value already exists.');
+  f.dropdownValues.push(val);
+  el.value='';
+  renderVars();
+  setTimeout(()=>{const ne=document.getElementById('dd-new-val-'+fId);if(ne)ne.focus();},80);
+}
+function removeDropdownValue(fId,idx){
+  const f=getFeat(fId);
+  const val=f.dropdownValues[idx];
+  // check if any band uses this value
+  const inUse=bands.some(b=>b.fId===fId&&b.v1.toLowerCase()===val.toLowerCase());
+  if(inUse&&!confirm(`"${val}" is used in a score band. Removing it will also delete that band. Continue?`)) return;
+  if(inUse) bands=bands.filter(b=>!(b.fId===fId&&b.v1.toLowerCase()===val.toLowerCase()));
+  f.dropdownValues.splice(idx,1);
+  renderVars();
+}
+
+function saveGroup(){
+  const name=document.getElementById('ng-name')?.value.trim();
+  if(!name) return alert('Group name is required.');
+  groups.push({id:uid(),name,open:true});
+  document.getElementById('add-group-panel').classList.remove('open');
+  renderFeatures();
+}
+function saveSG(gId){
+  const name=document.getElementById('nsg-'+gId)?.value.trim();
+  if(!name) return alert('Sub-group name is required.');
+  subGroups.push({id:uid(),gId,name,open:true});
+  document.getElementById('add-sg-'+gId).classList.remove('open');
+  renderFeatures();
+}
+function saveFeat(sgId){
+  const tbl  =document.getElementById('nf-tbl-'+sgId)?.value;
+  const field=document.getElementById('nf-field-'+sgId)?.value;
+  const dname=document.getElementById('nf-dname-'+sgId)?.value.trim();
+  const dtype=document.getElementById('nf-dtype-'+sgId)?.value||'number';
+  const unit =dtype==='dropdown'?'':(document.getElementById('nf-unit-'+sgId)?.value.trim()||'');
+  if(!tbl)   return alert('Please select a source table.');
+  if(!field) return alert('Please select a field.');
+  if(!dname) return alert('Display name is required.');
+  if(alreadyAdded(tbl,field)) return alert('This field has already been added.');
+  features.push({id:uid(),sgId,catalogField:field,sourceTable:tbl,dataType:dtype,unit,displayName:dname,dropdownValues:[]});
+  document.getElementById('add-f-'+sgId).classList.remove('open');
+  renderCurrent();
+}
+function deleteBand(bId){
+  const b = bands.find(x=>x.id===bId);
+  if(b){
+    const f = getFeat(b.fId);
+    // keep the form pointing at this feature so dropdown state recalculates
+    if(f){
+      const sg = getSG(f);
+      const g  = getG(f);
+      if(g)  rbGroup    = g.id;
+      if(sg) rbSubGroup = sg.id;
+      rbFeat = f.id;
+    }
+  }
+  bands = bands.filter(x=>x.id!==bId);
+  renderRules();
+}
+function deleteFeat(fId){
+  if(!confirm('Delete this feature and all its score bands?')) return;
+  features=features.filter(f=>f.id!==fId);
+  bands=bands.filter(b=>b.fId!==fId);
+  if(rbFeat===fId){rbFeat='';rbSubGroup='';}
+  renderCurrent();
+}
+function deleteSG(sgId){
+  const fIds=features.filter(f=>f.sgId===sgId).map(f=>f.id);
+  if(fIds.length&&!confirm('Delete sub-group and all its features?')) return;
+  subGroups=subGroups.filter(s=>s.id!==sgId);
+  features=features.filter(f=>f.sgId!==sgId);
+  bands=bands.filter(b=>!fIds.includes(b.fId));
+  if(fIds.includes(rbFeat)){rbFeat='';rbSubGroup='';}
+  if(rbSubGroup===sgId) rbSubGroup='';
+  renderCurrent();
+}
+function deleteGroup(gId){
+  const sgIds=subGroups.filter(s=>s.gId===gId).map(s=>s.id);
+  const fIds=features.filter(f=>sgIds.includes(f.sgId)).map(f=>f.id);
+  if((sgIds.length||fIds.length)&&!confirm('Delete group and everything inside it?')) return;
+  groups=groups.filter(g=>g.id!==gId);
+  subGroups=subGroups.filter(s=>s.gId!==gId);
+  features=features.filter(f=>!sgIds.includes(f.sgId));
+  bands=bands.filter(b=>!fIds.includes(b.fId));
+  if(fIds.includes(rbFeat)){rbFeat='';rbSubGroup='';rbGroup='';}
+  if(rbGroup===gId) rbGroup='';
+  renderCurrent();
+}
+function clearSim(){
+  features.forEach(f=>{
+    const el=document.getElementById('sv-'+f.id);
+    if(el){f.dataType==='dropdown'?el.value='':el.value='';}
+    const mel=document.getElementById('sm-'+f.id);
+    if(mel) mel.innerHTML='';
+  });
+  simulate();
+}
+
+renderFeatures();
+</script>
+</body>
+</html>
