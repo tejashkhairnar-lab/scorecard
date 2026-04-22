@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knight Fintech · Underwriter Workstation · CASA Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Knight Fintech — light theme: white bg, navy text, orange accent */
+  --bg:#F4F6F9;--surf:#FFFFFF;--card:#FFFFFF;--card2:#F8F9FC;
+  --bdr:#E2E8F0;--bdr2:#CBD5E1;
+  --navy:#0F2D52;--navy2:#1A3F70;
+  --gold:#F47B20;--goldl:#FF9245;--goldb:rgba(244,123,32,0.09);--goldbl:rgba(244,123,32,0.16);
+  --tx:#0F2D52;--mu:#64748B;--di:#CBD5E1;
+  --gr:#0D7A4E;--grb:rgba(13,122,78,0.08);
+  --tl:#0369A1;--tlb:rgba(3,105,161,0.08);
+  --am:#B45309;--amb:rgba(180,83,9,0.08);
+  --re:#B91C1C;--reb:rgba(185,28,28,0.08);
+  --pu:#5B21B6;--pub:rgba(91,33,182,0.08);
+  --bl:#1D4ED8;--blb:rgba(29,78,216,0.08);
+  --fn:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --r:8px;--rl:10px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:13px;line-height:1.5}
+#app{position:relative;height:100vh;display:flex;flex-direction:column}
+
+/* ── HEADER ── */
+#hdr{height:52px;border-bottom:2px solid var(--gold);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--navy);flex-shrink:0;gap:14px}
+.logo{font-family:var(--fn);font-weight:800;font-size:11px;color:#FFFFFF;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.lgem{width:16px;height:16px;background:var(--gold);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);flex-shrink:0}
+.logo-sep{width:1px;height:20px;background:rgba(15,45,82,0.14)}
+.ppills{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.ppills::-webkit-scrollbar{display:none}
+.pp{cursor:pointer;padding:4px 11px;border-radius:20px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.55);background:transparent;border:1px solid rgba(15,45,82,0.12);transition:all .15s;white-space:nowrap;font-family:var(--fb)}
+.pp:hover{border-color:rgba(255,255,255,0.4);color:#FFF}
+.pp.act{background:var(--gold);border-color:var(--gold);color:#FFFFFF}
+.steplbl{font-size:9px;font-family:var(--fn);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,0.45);white-space:nowrap}
+
+/* ── MAIN ── */
+#main{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .25s ease;display:flex;flex-direction:column}
+.screen.act{opacity:1;pointer-events:all}
+.scrl{flex:1;overflow-y:auto;padding:14px 18px;display:flex;flex-direction:column;gap:12px}
+.scrl::-webkit-scrollbar{width:3px}
+.scrl::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+
+/* ── FOOTER ── */
+#ftr{height:50px;border-top:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surf);flex-shrink:0;box-shadow:0 -1px 0 var(--bdr)}
+.btn{cursor:pointer;padding:8px 18px;border-radius:var(--r);font-size:11px;font-weight:600;border:1px solid var(--bdr2);background:var(--surf);color:var(--mu);transition:all .15s;font-family:var(--fb);display:flex;align-items:center;gap:5px}
+.btn:hover{background:var(--bg);border-color:var(--navy);color:var(--navy)}
+.btn:disabled{opacity:.35;cursor:default;pointer-events:none}
+.btn.pri{background:var(--gold);color:#FFFFFF;border-color:var(--gold);font-weight:700}
+.btn.pri:hover{background:var(--goldl);border-color:var(--goldl)}
+.steps{display:flex;align-items:center;gap:0}
+.step{display:flex;align-items:center;gap:0}
+.sdot{width:26px;height:26px;border-radius:50%;border:2px solid var(--bdr2);background:var(--surf);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--mu);font-family:var(--fn);transition:all .2s;cursor:pointer}
+.sdot.act{background:var(--gold);border-color:var(--gold);color:#FFFFFF}
+.sdot.done{background:var(--grb);border-color:var(--gr);color:var(--gr)}
+.sline{width:32px;height:2px;background:var(--bdr)}
+
+/* ── UTILITIES ── */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--rl);box-shadow:0 1px 3px rgba(15,45,82,0.06)}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:5px;font-family:var(--fn);font-size:11px;font-weight:700}
+.lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)}
+.hdiv{height:1px;background:var(--bdr)}
+@keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fadein{animation:fadein .3s ease forwards}
+
+/* ── S1: PROFILE GRID ── */
+.s1grid{display:grid;grid-template-columns:220px 1fr 300px;gap:12px;min-height:0}
+
+/* persona card */
+.pcard{display:flex;flex-direction:column;align-items:center;padding:18px 14px;gap:10px;text-align:center}
+.ava{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fn);font-size:18px;font-weight:800;color:#FFFFFF;flex-shrink:0}
+.pname{font-family:var(--fn);font-size:14px;font-weight:800;color:var(--navy);line-height:1.2}
+.psub{font-size:10px;color:var(--mu);line-height:1.4;margin-top:2px}
+.prow{width:100%;display:flex;justify-content:space-between;align-items:baseline}
+.prl{font-size:10px;color:var(--mu)}
+.prv{font-size:10px;font-weight:600;color:var(--navy);text-align:right;max-width:110px;line-height:1.3}
+
+/* bureau panel */
+.bpanel{padding:16px}
+.bpanel-title{display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
+.b2grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 12px}
+.bstat{display:flex;flex-direction:column;gap:2px}
+.bstat-l{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+.bstat-v{font-size:13px;font-weight:700;color:var(--navy);line-height:1.2}
+
+/* revolver/transactor */
+.rtrow{display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 10px;border-radius:var(--r);border:1px solid}
+.rt-ic{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.rt-desc{font-size:10px;color:var(--mu);line-height:1.4}
+
+/* credit history bar */
+.hist-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.hist-yr{font-size:9px;color:var(--mu);width:22px;flex-shrink:0}
+.hist-track{flex:1;height:6px;border-radius:3px;background:var(--bg);overflow:hidden;position:relative;border:1px solid var(--bdr)}
+.hist-fill{height:100%;border-radius:3px;position:absolute;left:0;top:0}
+.hist-tag{font-size:9px;font-weight:700;width:36px;flex-shrink:0;text-align:right}
+
+/* score side */
+.spanel{padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.drv-item{width:100%;display:flex;align-items:flex-start;gap:7px;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.drv-item:last-child{border-bottom:none}
+.drv-dot{width:5px;height:5px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.drv-txt{flex:1;font-size:10px;color:var(--mu);line-height:1.35}
+.drv-pts{font-size:11px;font-weight:700;flex-shrink:0}
+
+/* ── S2: INCOME ── */
+.adj-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bdr)}
+.adj-row:last-child{border-bottom:none}
+.adj-txt{font-size:10px;color:var(--mu)}
+.adj-val{font-size:11px;font-weight:700;font-family:var(--fm)}
+
+/* ── S3: MATRIX + PRODUCTS ── */
+.mx-cell{display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:10px;font-weight:600;padding:8px 5px;text-align:center;line-height:1.3;transition:all .2s;position:relative;cursor:default;border:1px solid transparent}
+.mx-cell.hit{border-width:2px!important}
+.prd-card{padding:12px 14px;display:flex;flex-direction:column;gap:6px;transition:all .15s}
+.prd-card:hover{border-color:var(--navy2);box-shadow:0 2px 8px rgba(15,45,82,0.1)}
+.prd-name{font-size:11px;font-weight:700;color:var(--navy);line-height:1.3}
+.prd-desc{font-size:10px;color:var(--mu);line-height:1.35}
+.prd-lim{font-family:var(--fn);font-size:15px;font-weight:800;margin-top:2px}
+
+/* processing overlay */
+#proc{position:absolute;inset:0;background:rgba(244,246,249,0.97);z-index:20;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px}
+#proc.on{display:flex}
+.pline{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:var(--r);border:1px solid var(--bdr);background:var(--surf);width:100%;max-width:500px;opacity:.3;transition:all .3s;box-shadow:0 1px 3px rgba(15,45,82,0.06)}
+.pline.go{opacity:1;border-color:var(--gold);background:#FFFBF7}
+.pline.dn{opacity:1;border-color:var(--gr);background:var(--grb)}
+.pico{width:26px;height:26px;border-radius:5px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.ptxt{flex:1;font-size:11px;font-weight:500;color:var(--navy)}
+.pst{font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--mu)}
+.spinr{width:10px;height:10px;border:2px solid var(--bdr2);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hdr">
+    <div class="logo">
+      <div class="lgem"></div>
+      <span>Knight</span><span style="color:var(--gold)">Fintech</span>
+      <div class="logo-sep"></div>
+      <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,0.55);letter-spacing:.06em">Underwriter Workstation</span>
+      <div class="logo-sep"></div>
+      <span style="font-weight:500;font-size:10px;color:rgba(255,255,255,0.38);letter-spacing:.04em">CASA Onboarding Review</span>
+    </div>
+    <!-- Application queue pills -->
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <span style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap">Application Queue</span>
+      <div class="ppills" id="ppills"></div>
+      <div style="padding:2px 8px;border-radius:4px;background:rgba(244,123,32,0.18);border:1px solid rgba(244,123,32,0.4);font-size:9px;font-weight:700;color:var(--gold);white-space:nowrap">8 Pending</div>
+    </div>
+    <!-- Underwriter identity -->
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="text-align:right">
+        <div style="font-size:10px;font-weight:700;color:#FFF">Meghna R.</div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.4)">Underwriter · BR0094 · UW-0042</div>
+      </div>
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#FFF;flex-shrink:0">MR</div>
+    </div>
+  </header>
+
+  <div id="appbar" style="height:32px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 20px;gap:16px;background:var(--surf);flex-shrink:0;font-size:10px">
+    <div id="ab-appno" style="font-family:var(--fm);font-weight:700;color:var(--navy)"></div>
+    <div style="width:1px;height:14px;background:var(--bdr)"></div>
+    <div id="ab-cif" style="color:var(--mu)"></div>
+    <div style="width:1px;height:14px;background:var(--bdr)"></div>
+    <div id="ab-branch" style="color:var(--mu)"></div>
+    <div style="width:1px;height:14px;background:var(--bdr)"></div>
+    <div id="ab-date" style="color:var(--mu)"></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <span style="font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em">Reviewing:</span>
+      <span id="ab-name" style="font-weight:700;color:var(--navy)"></span>
+      <div style="width:1px;height:14px;background:var(--bdr);margin:0 4px"></div>
+      <span id="steplbl" style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)"></span>
+    </div>
+  </div>
+<main id="main">
+    <!-- Processing overlay -->
+    <div id="proc">
+      <div style="font-family:var(--fn);font-size:18px;font-weight:700;text-align:center">Running Assessment<br><span style="font-size:11px;font-weight:400;color:var(--mu)">Application </span><span style="font-family:var(--fm);font-size:11px;font-weight:700;color:var(--gold)" id="proc-name"></span></div>
+      <div style="display:flex;flex-direction:column;gap:7px;width:100%;max-width:500px" id="plines"></div>
+      <div style="font-size:11px;color:var(--gr);opacity:0;transition:opacity .4s;font-weight:600" id="pdone">Assessment complete — proceeding to Risk Review ✓</div>
+    </div>
+
+    <!-- SCREEN 1: Profile + Score -->
+    <div class="screen act" id="s1">
+      <div class="scrl" id="s1c"></div>
+    </div>
+
+    <!-- SCREEN 2: Income Estimation -->
+    <div class="screen" id="s2">
+      <div class="scrl" id="s2c"></div>
+    </div>
+
+    <!-- SCREEN 3: Matrix + Products -->
+    <div class="screen" id="s3">
+      <div class="scrl" id="s3c"></div>
+    </div>
+  </main>
+
+  <nav id="ftr">
+    <button class="btn" id="bprev" onclick="nav(-1)">← Previous Step</button>
+    <div class="steps" id="steps"></div>
+    <button class="btn pri" id="bnext" onclick="nav(1)">Run Income Engine →</button>
+  </nav>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────────────────────────
+const P=[
+{
+  id:0,av:"RD",name:"Rahul Desai",sub:"Marketing Manager · Private Firm · Pune",
+  appMeta:{appNo:"APP-2025-00412",cifId:"CIF-83047291",appDate:"14 Mar 2025",
+    channel:"Digital — Mobile App",branch:"Pune Koregaon Park — BR0094",
+    rmCode:"RM-KP-009",pan:"BKXPD4***X",mobile:"98765 ***21",kycStatus:"eKYC Verified"},
+
+  dem:{Age:"28","Emp. Type":"Salaried — Private Sector","Income Band":"₹5L – ₹10L p.a.","ITR":"Not available","Bureau":"Experian"},
+  bureau:{
+    score:714,
+    // D1-D5: DPD & Delinquency
+    maxDpdEver:30, maxDpd24m:0, acctsDpd12m:0,
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"14 / 30",
+    dpd:"DPD 30 × 1 — 18M ago, resolved",
+    // D6-D10: Capacity & Structure
+    activeEmiTotal:20000, totalAccts:4, activeAccts:3, closedAccts:1,
+    util:42, churnRate:"22%", securedRatio:35, highestTicket:"₹26,000",
+    highestTicketLabel:"PL — implied income at sanction",
+    // D11-D12: Vintage
+    vintageYrs:3.5, vintageFlag:false,
+    // D13-D15: Income & Enquiries
+    enq3:1, enq12:5,
+    lenderProfile:"NBFC + Private banks — lower underwriting rigour",
+    goldLoanProxy:null,
+    // Legacy fields
+    emi:"₹20,000/mo", limit:"₹60,000", bal:"₹25,200"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"30 days",   c:"amber", n:"Single 30-DPD, 18M ago, resolved"},
+      {l:"Max DPD 24M",      v:"0",         c:"green", n:"Clean last 24 months"},
+      {l:"Accounts DPD 12M", v:"0",         c:"green", n:"No active delinquency"},
+      {l:"Write-off",        v:"None",      c:"green", n:"No write-off or settlement"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹20,000",   c:"amber", n:"Personal loan + 2-wheeler"},
+      {l:"Utilisation",      v:"42%",       c:"amber", n:"Moderate revolving burden"},
+      {l:"Secured %",        v:"35%",       c:"red",   n:"Mostly unsecured tradelines"},
+      {l:"Highest Ticket",   v:"₹26,000",   c:"red",   n:"Small-ticket unsecured only — weak income anchor"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"3.5 yrs",   c:"amber", n:"Short history"},
+      {l:"Acct Churn",       v:"22%",       c:"red",   n:"Low closure rate — mostly active unsecured"},
+      {l:"Enquiries 12M",    v:"5",         c:"amber", n:"Moderate velocity"},
+      {l:"Lender Tier",      v:"NBFC/Pvt",  c:"amber", n:"No PSU/prime bank relationship"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"Clean",     c:"green", n:"PAN/bureau name match"},
+      {l:"Adverse Check Score", v:"22",        c:"green", n:"Below amber threshold (40). No adverse signals."},
+      {l:"Enq Velocity",     v:"1 / 3M",    c:"green", n:"Single enquiry in 3 months"},
+      {l:"Vintage Flag",     v:"None",      c:"green", n:"No anomaly"},
+    ]
+  },
+  rec:{
+    personaType:"Salaried Entry", portfolioType:"Mix",
+    targetFoir:35, headroomEmi:0, cashflow:18234, lendable:0,
+    ccOffer:0, ccAction:"No headroom — current FOIR 47% exceeds target 35%", existingCcLimit:30000,
+    plOffer:0, upgradeNote:"Repay existing EMIs or verify income ≥ ₹33,333/mo to unlock entry CC.",
+    services:["Savings Account","Recurring Deposit ₹2,000/mo"],
+    creditBlocked:true, blockReason:"Current FOIR 47% > target 35% for Salaried Entry · Band B · Mix"
+  },
+  rtype:"revolver",
+  hist:[{y:"2024",pct:92,c:"#0891B2",l:"Good",ev:""},
+        {y:"2023",pct:78,c:"#D97706",l:"DPD 30",ev:"Single missed EMI — resolved"},
+        {y:"2022",pct:100,c:"#16A266",l:"Clean",ev:"Personal loan added"},
+        {y:"2021",pct:100,c:"#16A266",l:"Clean",ev:"2-wheeler loan start"}],
+  scoring:{bureauRaw:714,bureauProvider:"Experian",bureauNorm:69,internal:69,gap:0,bureauWt:50,internalWt:50,adjusted:69},
+  score:69,band:"B",pillars:[72,62,74,82],
+  drivers:[{t:"DPD 30 — once, 18M ago (resolved)",s:"–6",p:-1},
+           {t:"FOIR 47% (bureau+band adjusted) — above target 35% for profile",s:"–14",p:-1},
+           {t:"Credit utilisation 42%",s:"–4",p:-1},
+           {t:"Enquiry velocity (5 in 12M) — slightly elevated",s:"–3",p:-1}],
+  fraud:"Green",foir:64,
+  incomeEng:{
+    method:"EMI-back",
+    hierarchy:"No verified document (ITR/AA/salary slip) available. Income is ESTIMATED from bureau EMI-back. Persona type: Salaried-Private → moderate confidence multiplier.",
+    tradelines:[
+      {type:"Personal Loan",cat:"Unsecured",emi:13000,vintage:"Sep 2022",n:2.5,g:6,ss:0.40,foirPct:50,impliedSanction:26000,incomeToday:30134,wt:0.40},
+      {type:"2-Wheeler Loan",cat:"Secured",emi:7000,vintage:"Mar 2021",n:4.0,g:8,ss:0.70,foirPct:45,impliedSanction:15556,incomeToday:21156,wt:0.70},
+      {type:"Credit Card",cat:"Card",emi:null,vintage:"Jan 2022",n:3.2,g:6,ss:0.35,foirPct:null,impliedSanction:20000,incomeToday:24180,wt:0.35,cardLimit:30000,cardMultiple:1.5,cardTier:"Tier-2 issuer"}
+    ],
+    emiBkComposite:"₹24,363",
+    itr:null,aa:null,
+    finalFormula:"Bureau EMI-back: Σ(EMI ÷ FOIR_at_origination × (1+g)^n × signal_strength) ÷ Σ(signal_strength). Persona: Salaried-Private. Growth: PL 6%, 2W 7%. FOIR orig: 50%, 45%.",
+    finalCalc:"Estimated income: ₹24,363. Confidence: Medium-Low (no verified doc, short bureau vintage 3.5yr, all unsecured tradelines). ",
+    range:{floor:24363,ceiling:24363},gap:0,gapPct:0,
+    conf:"Medium-Low",pctile:35,foirDenom:24363,
+    confNote:"Bureau-only estimate. No verified document. All tradelines unsecured — lower signal quality. Persona Salaried-Private: no uplift. Estimated income ₹24,363 used as FOIR denominator. FOIR = 20,000 ÷ 24,363 = 82%."
+  },
+  eInc:"₹24,363 (Bureau Est.)",eConf:"Medium-Low",eBand:"Mid",incNum:24363,foir:47,
+  category:"Restricted",
+  products:[
+    {n:"Basic Savings Account",i:"🏦",t:"restricted",d:"Account opened — no credit products.",lim:null},
+    {n:"All Credit Products",i:"🚫",t:"blocked",d:"FOIR 64% > 60% hard cap. Override fires regardless of score.",lim:null},
+    {n:"Credit Review Pathway",i:"📅",t:"upgrade",d:"File ITR or connect AA. With ITR ₹44K net: FOIR = 45% → entry CC eligible.",lim:null}],
+  dec:"Restricted — FOIR Override",dtype:"restricted",
+  narr:"Bureau-only estimated income ₹24,363 puts FOIR at 82% — hard override fires. This is not a flaw: without ITR or AA, the engine cannot verify higher income. If Rahul provides ITR showing ₹44K+, FOIR drops to <45% — immediately eligible. The fix is onboarding the verified document."
+},{
+  id:1,av:"VJ",name:"Vikram Joshi",sub:"Production Manager · Over-Leveraged · Hyderabad",
+  appMeta:{appNo:"APP-2025-00387",cifId:"CIF-72910483",appDate:"11 Mar 2025",
+    channel:"Digital — Web",branch:"Hyderabad Jubilee Hills — BR0142",
+    rmCode:"RM-JH-017",pan:"CLRPV7***K",mobile:"97654 ***08",kycStatus:"eKYC Verified"},
+
+  dem:{Age:"35","Emp. Type":"Salaried — Manufacturing","Income Band":"₹5L – ₹10L p.a.","ITR":"Not available","Bureau":"CIBIL"},
+  bureau:{
+    score:624,
+    maxDpdEver:60, maxDpd24m:60, acctsDpd12m:2,
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"2 / 30",
+    dpd:"DPD 60+ × 1 (12M) · DPD 30 × 3 (24M)",
+    activeEmiTotal:36000, totalAccts:5, activeAccts:4, closedAccts:1,
+    util:82, churnRate:"20%", securedRatio:0, highestTicket:"₹24,000",
+    highestTicketLabel:"PL1 — all unsecured, weak signal",
+    vintageYrs:5.0, vintageFlag:false,
+    enq3:4, enq12:14,
+    lenderProfile:"NBFCs only — distress borrowing pattern",
+    goldLoanProxy:null,
+    emi:"₹36,000/mo", limit:"₹70,000", bal:"₹57,400"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"60 days",   c:"red",   n:"Severe delinquency — within 12M"},
+      {l:"Max DPD 24M",      v:"60 days",   c:"red",   n:"DPD 60+ confirmed recent"},
+      {l:"Accounts DPD 12M", v:"2",         c:"red",   n:"Two accounts delinquent in 12M"},
+      {l:"Write-off",        v:"None",      c:"green", n:"No write-off yet — but trajectory is negative"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹36,000",   c:"red",   n:"4 personal loans stacked"},
+      {l:"Utilisation",      v:"82%",       c:"red",   n:"Near-maxed — severe revolving stress"},
+      {l:"Secured %",        v:"0%",        c:"red",   n:"All unsecured — zero asset backing"},
+      {l:"Highest Ticket",   v:"₹24,000",   c:"red",   n:"Only small unsecured loans — distress pattern"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"5 yrs",     c:"amber", n:"Adequate history — but trending down"},
+      {l:"Acct Churn",       v:"20%",       c:"red",   n:"Stacking loans, not closing"},
+      {l:"Enquiries 12M",    v:"14",        c:"red",   n:"Distress borrowing — 14 in 12M"},
+      {l:"Lender Tier",      v:"NBFC only", c:"red",   n:"No bank relationship — last-resort lenders"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"Amber",     c:"amber", n:"Unusual borrowing pattern — flagged"},
+      {l:"Adverse Check Score", v:"48",        c:"amber", n:"Above amber threshold (40). Manual review required."},
+      {l:"Enq Velocity",     v:"4 / 3M",    c:"red",   n:"4 enquiries in 3 months"},
+      {l:"Vintage Flag",     v:"None",      c:"green", n:"No date anomaly"},
+    ]
+  },
+  rec:{
+    personaType:"Salaried Entry", portfolioType:"Unsec",
+    targetFoir:null, headroomEmi:0, cashflow:9709, lendable:0,
+    ccOffer:0, ccAction:"No credit — FOIR 119% hard override. Band C score improvement does not override FOIR cap.",
+    plOffer:0, upgradeNote:"Zero credit products. 12M clean DPD + FOIR reduction to <30% required.",
+    services:["Basic Savings Account"],
+    creditBlocked:true, blockReason:"FOIR 119% > 60% hard cap. Credit blocked regardless of band. Adjusted score 46 = Band C."
+  },
+  rtype:"revolver",
+  hist:[{y:"2024",pct:35,c:"#DC3545",l:"Severe",ev:"DPD 60+ — first severe delinquency"},
+        {y:"2023",pct:58,c:"#D97706",l:"DPD 30",ev:"DPD 30 × 2 in H2 2023"},
+        {y:"2022",pct:72,c:"#D97706",l:"Stress",ev:"DPD 30 — growing EMI burden"},
+        {y:"2021",pct:88,c:"#0891B2",l:"OK",ev:"2 new unsecured loans added"},
+        {y:"2020",pct:100,c:"#16A266",l:"Clean",ev:""}],
+  scoring:{bureauRaw:624,bureauProvider:"CIBIL",bureauNorm:54,internal:38,gap:16,bureauWt:54,internalWt:46,adjusted:47},
+  score:47,band:"C",pillars:[28,14,40,45],
+  drivers:[{t:"DPD 60+ in last 12 months — severe delinquency",s:"–18",p:-1},
+           {t:"FOIR 77% — critically over-leveraged",s:"–16",p:-1},
+           {t:"14 enquiries in 12M — distress borrowing pattern",s:"–10",p:-1},
+           {t:"High credit utilisation (82%)",s:"–8",p:-1}],
+  fraud:"Amber",foir:77,
+  incomeEng:{
+    method:"EMI-back",
+    hierarchy:"No verified document (ITR/AA/salary slip). Income ESTIMATED from bureau EMI-back. Persona: Salaried-Manufacturing, distress pattern. All unsecured — lowest signal quality.",
+    tradelines:[
+      {type:"Personal Loan 1",cat:"Unsecured",emi:12000,vintage:"Aug 2021",n:3.6,g:6,ss:0.40,foirPct:50,impliedSanction:24000,incomeToday:29038,wt:0.40},
+      {type:"Personal Loan 2",cat:"Unsecured",emi:11000,vintage:"Mar 2023",n:2.0,g:6,ss:0.40,foirPct:50,impliedSanction:22000,incomeToday:24730,wt:0.40},
+      {type:"Personal Loan 3",cat:"Unsecured",emi:8000,vintage:"Jan 2024",n:1.2,g:6,ss:0.40,foirPct:50,impliedSanction:16000,incomeToday:17169,wt:0.40},
+      {type:"Consumer Loan",cat:"Unsecured",emi:5000,vintage:"Jun 2023",n:1.8,g:6,ss:0.15,foirPct:55,impliedSanction:9091,incomeToday:10079,wt:0.15}
+    ],
+    emiBkComposite:"₹24,300",
+    itr:null,aa:null,
+    finalFormula:"Bureau EMI-back across 4 unsecured loans. Persona: Salaried-Manufacturing. Distress flag: 4 personal loans in 4 years. Signal strength very low.",
+    finalCalc:"Estimated income: ₹24,300. Confidence: Low (all unsecured, distress borrowing pattern, 4 PL in 4yr). FOIR denominator = ₹24,300.",
+    range:{floor:24300,ceiling:24300},gap:0,gapPct:0,
+    conf:"Low",pctile:30,foirDenom:24300,
+    confNote:"Bureau-only. All unsecured = very weak signal. Distress pattern confirmed. Estimated ₹24,300 used as denominator. FOIR = 36,000 ÷ 24,300 = 148%. Hard override."
+  },
+  eInc:"₹24,300 (Bureau Est.)",eConf:"Low",eBand:"Mid",incNum:24300,foir:104,
+  category:"Restricted",
+  products:[
+    {n:"Basic Savings Account",i:"🏦",t:"restricted",d:"Manual KYC review required (Amber adverse signal).",lim:null},
+    {n:"All Credit Products",i:"🚫",t:"blocked",d:"Hard override: FOIR 77% > cap of 60%. Zero credit.",lim:null},
+    {n:"Re-Assessment in 12 Months",i:"📅",t:"upgrade",d:"Eligible if FOIR < 50% and zero fresh DPD in 12M.",lim:null}],
+  dec:"Restricted — Account Only",dtype:"restricted",
+  narr:"Bureau-only estimated income ₹24,300 yields FOIR 148% — catastrophic. All tradelines are unsecured distress loans. Hard reject is correct. Only path: zero new debt + 12M clean bureau."
+},{
+  id:2,av:"AN",name:"Arjun Nair",sub:"Senior Engineering Manager · MNC · Bangalore",
+  appMeta:{appNo:"APP-2025-00401",cifId:"CIF-60928374",appDate:"13 Mar 2025",
+    channel:"Digital — Mobile App",branch:"Bangalore Indiranagar — BR0071",
+    rmCode:"RM-IN-024",pan:"AYZPN9***R",mobile:"96541 ***44",kycStatus:"eKYC Verified"},
+
+  dem:{Age:"37","Emp. Type":"Salaried — MNC (IT)","Income Band":"₹10L – ₹25L p.a.","ITR":"Not available (AY2024-25 filing delayed)","Bureau":"CIBIL"},
+  bureau:{
+    score:791,
+    maxDpdEver:0, maxDpd24m:0, acctsDpd12m:0,
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"30 / 30",
+    dpd:"None — 8-year clean history",
+    activeEmiTotal:37000, totalAccts:5, activeAccts:3, closedAccts:2,
+    util:8, churnRate:"40%", securedRatio:85, highestTicket:"₹80,000",
+    highestTicketLabel:"HL — income at sanction (8%×6yr → ₹1.37L today)",
+    vintageYrs:8.0, vintageFlag:false,
+    enq3:0, enq12:1,
+    lenderProfile:"Private bank (HL) + NBFC (PL) — strong primary signal",
+    goldLoanProxy:null,
+    emi:"₹37,000/mo", limit:"₹5,00,000", bal:"₹40,000"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"0",         c:"green", n:"Clean 8-year history"},
+      {l:"Max DPD 24M",      v:"0",         c:"green", n:"Perfect last 24 months"},
+      {l:"Accounts DPD 12M", v:"0",         c:"green", n:"Zero delinquency"},
+      {l:"Write-off",        v:"None",      c:"green", n:"No write-off or settlement"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹37,000",   c:"amber", n:"Home loan + PL (CC excluded — transactor)"},
+      {l:"Utilisation",      v:"8%",        c:"green", n:"₹40K on ₹5L Infinia limit — disciplined"},
+      {l:"Secured %",        v:"85%",       c:"green", n:"Home loan dominates — strong asset backing"},
+      {l:"Highest Ticket",   v:"₹80,000",   c:"green", n:"HL income at sanction — ₹1.37L today (8%×6yr)"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"8 yrs",     c:"green", n:"Long, clean history"},
+      {l:"Acct Churn",       v:"40%",       c:"green", n:"2 of 5 closed cleanly"},
+      {l:"Enquiries 12M",    v:"1",         c:"green", n:"Very low velocity"},
+      {l:"Lender Tier",      v:"Pvt Bank",  c:"green", n:"HDFC Infinia — Tier-1 prime relationship"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"Clean",     c:"green", n:"PAN/bureau match confirmed"},
+      {l:"Adverse Check Score", v:"8",         c:"green", n:"Well below threshold. No adverse signals."},
+      {l:"Enq Velocity",     v:"0 / 3M",    c:"green", n:"Zero recent enquiries"},
+      {l:"Vintage Flag",     v:"None",      c:"green", n:"No anomaly"},
+    ]
+  },
+  rec:{
+    personaType:"Salaried High", portfolioType:"Sec",
+    targetFoir:58, headroomEmi:45300, cashflow:59456, lendable:36240,
+    ccOffer:500000, ccAction:"Existing HDFC Infinia ₹5,00,000 already at optimal limit — no upgrade triggered",
+    existingCcLimit:500000, plOffer:1014709,
+    upgradeNote:"",
+    services:["Premium Savings Account","Dedicated RM","Sweep-in FD","SIP auto-debit","Term Insurance"],
+    creditBlocked:false, blockReason:""
+  },
+  rtype:"transactor",
+  hist:[{y:"2024",pct:100,c:"#16A266",l:"Clean",ev:"HDFC Infinia CC upgraded"},
+        {y:"2023",pct:100,c:"#16A266",l:"Clean",ev:""},
+        {y:"2022",pct:100,c:"#16A266",l:"Clean",ev:"Car loan closed (prepaid)"},
+        {y:"2021",pct:100,c:"#16A266",l:"Clean",ev:"Personal loan — home renovation"},
+        {y:"2020",pct:100,c:"#16A266",l:"Clean",ev:""},
+        {y:"2019",pct:100,c:"#16A266",l:"Clean",ev:"Home loan start"}],
+  scoring:{bureauRaw:791,bureauProvider:"CIBIL",bureauNorm:82,internal:84,gap:2,bureauWt:50.5,internalWt:49.5,adjusted:83},
+  score:83,band:"A",pillars:[96,88,90,94],
+  drivers:[{t:"Zero DPD across 8-year bureau history — exceptional",s:"+14",p:1},
+           {t:"FOIR 29% — strong headroom on bureau-estimated income",s:"+10",p:1},
+           {t:"HDFC Infinia CC — Tier-1 Premium, ₹5L limit",s:"+8",p:1},
+           {t:"ITR not available (filing delayed) — confidence capped at Medium-High",s:"–4",p:-1}],
+  fraud:"Green",foir:29,
+  incomeEng:{
+    method:"Bureau EMI-back",
+    hierarchy:"No verified document (ITR filing delayed, no AA pulled). Income ESTIMATED from bureau EMI-back. Persona: Salaried-MNC Transactor — highest confidence multiplier for bureau-only mode.",
+    tradelines:[
+      {type:"Home Loan",cat:"Secured",emi:32000,vintage:"Mar 2019",n:6.0,g:8,ss:0.90,foirPct:40,impliedSanction:80000,incomeToday:137106,wt:0.90},
+      {type:"Personal Loan",cat:"Unsecured",emi:5000,vintage:"Sep 2023",n:1.5,g:6,ss:0.45,foirPct:50,impliedSanction:10000,incomeToday:10913,wt:0.45},
+      {type:"Credit Card",cat:"Card",emi:null,vintage:"Jan 2020",n:5.0,g:8,ss:0.35,foirPct:null,impliedSanction:166667,incomeToday:244888,wt:0.35,cardLimit:500000,cardMultiple:3.0,cardTier:"Tier-1 Premium (HDFC Infinia)"}
+    ],
+    emiBkComposite:"₹1,25,892",
+    itr:null,aa:null,
+    finalFormula:"Bureau EMI-back: Home loan ₹32K EMI → ₹80K at sanction → ₹1,37,106 today (7%+8%×6yr). PL ₹5K → ₹10,913 today. Infinia ₹5L limit ÷ 3× = ₹1,66,667 → ₹2,44,888 today. Weighted composite ÷ ΣSS.",
+    finalCalc:"Σ Weighted = (₹1,37,106×0.90) + (₹10,913×0.45) + (₹2,44,888×0.35) = ₹1,23,395 + ₹4,911 + ₹85,711 = ₹2,14,017. Composite = ₹2,14,017 ÷ 1.70 = ₹1,25,892. FOIR = ₹37,000 ÷ ₹1,25,892 = 29%.",
+    range:{floor:125892,ceiling:125892},gap:0,gapPct:0,
+    conf:"Medium-High",pctile:48,foirDenom:125892,
+    confNote:"No ITR — but transactor persona with secured home loan (7yr, 8% growth) + Tier-1 Premium CC (strong income signal) + zero DPD = highest confidence available in bureau-only mode. ITR submission would upgrade to Verified."
+  },
+  eInc:"₹1,25,892 (Bureau Est.)",eConf:"Medium-High",eBand:"High",incNum:125892,foir:26,
+  category:"Premium",
+  products:[
+    {n:"Premium Savings Account",i:"🏦",t:"premium",d:"Zero-balance waiver · Dedicated RM · Relationship pricing.",lim:null},
+    {n:"High-Limit Credit Card",i:"💳",t:"premium",d:"2× bureau-estimated income. Upgrade to verified limit on ITR submission.",lim:"₹2,50,000"},
+    {n:"Pre-Approved Personal Loan",i:"📋",t:"premium",d:"30-day offer. Upgrades to higher limit on ITR verification.",lim:"₹6,00,000"},
+    {n:"Sweep-In Fixed Deposit",i:"📈",t:"premium",d:"Auto-park idle balances above ₹75,000.",lim:null}],
+  dec:"Approved — Premium (Bureau-only)",dtype:"approved",
+  narr:"No ITR — but the bureau tells the full story. A ₹32K home loan EMI running 7 years at 8% annual income growth implies ₹1.37L income today. HDFC Infinia at ₹5L limit confirms a high-income profile. FOIR is 29% — well inside the premium zone. ITR submission at next filing season will upgrade the income to verified."
+},{
+  id:3,av:"PS",name:"Priya Sharma",sub:"Senior Software Engineer · MNC · Mumbai",
+  appMeta:{appNo:"APP-2025-00398",cifId:"CIF-55103827",appDate:"12 Mar 2025",
+    channel:"Digital — Web",branch:"Mumbai BKC — BR0018",
+    rmCode:"RM-BK-031",pan:"GHRPS2***F",mobile:"91234 ***67",kycStatus:"eKYC Verified"},
+
+  dem:{Age:"32","Emp. Type":"Salaried — MNC (IT)","Income Band":"₹10L – ₹25L p.a.","ITR":"Available ✓","Bureau":"CIBIL"},
+  bureau:{
+    score:782,
+    maxDpdEver:0, maxDpd24m:0, acctsDpd12m:0,
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"30 / 30",
+    dpd:"None — 6-year clean history",
+    activeEmiTotal:24000, totalAccts:4, activeAccts:3, closedAccts:1,
+    util:18, churnRate:"25%", securedRatio:90, highestTicket:"₹45,000",
+    highestTicketLabel:"HL income at sanction — ITR-confirmed ₹1.2L",
+    vintageYrs:6.0, vintageFlag:false,
+    enq3:0, enq12:2,
+    lenderProfile:"PSU + Private banks — high underwriting quality",
+    goldLoanProxy:null,
+    emi:"₹24,000/mo", limit:"₹1,20,000", bal:"₹21,600"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"0",         c:"green", n:"6-year clean bureau"},
+      {l:"Max DPD 24M",      v:"0",         c:"green", n:"Perfect recent history"},
+      {l:"Accounts DPD 12M", v:"0",         c:"green", n:"Zero delinquency"},
+      {l:"Write-off",        v:"None",      c:"green", n:"No adverse events"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹24,000",   c:"green", n:"Home + auto loan (CC = transactor)"},
+      {l:"Utilisation",      v:"18%",       c:"green", n:"Low revolving balance"},
+      {l:"Secured %",        v:"90%",       c:"green", n:"Home + auto — strong asset-backed profile"},
+      {l:"Highest Ticket",   v:"₹45,000",   c:"green", n:"HL income at sanction — ITR confirms ₹1.2L"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"6 yrs",     c:"green", n:"Good vintage"},
+      {l:"Acct Churn",       v:"25%",       c:"green", n:"Responsible closures"},
+      {l:"Enquiries 12M",    v:"2",         c:"green", n:"Low — one CC enquiry expected"},
+      {l:"Lender Tier",      v:"PSU+Pvt",   c:"green", n:"SBI home loan + MNC IT employer signal"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"Clean",     c:"green", n:"ITR + bureau name match"},
+      {l:"Adverse Check Score", v:"6",         c:"green", n:"Lowest risk tier. No adverse signals."},
+      {l:"Enq Velocity",     v:"0 / 3M",    c:"green", n:"No recent enquiries"},
+      {l:"Vintage Flag",     v:"None",      c:"green", n:"No anomaly"},
+    ]
+  },
+  rec:{
+    personaType:"Salaried High", portfolioType:"Sec",
+    targetFoir:58, headroomEmi:53167, cashflow:55825, lendable:42533,
+    ccOffer:240000, ccAction:"UPGRADE — existing ₹1,20,000 → offer ₹2,40,000 (2× lendable headroom)", existingCcLimit:120000,
+    plOffer:1190936,
+    upgradeNote:"",
+    services:["Premium Savings Account","Dedicated RM","Sweep-in FD","SIP auto-debit","Term Insurance"],
+    creditBlocked:false, blockReason:""
+  },
+  rtype:"transactor",
+  hist:[{y:"2024",pct:100,c:"#16A266",l:"Clean",ev:""},
+        {y:"2023",pct:100,c:"#16A266",l:"Clean",ev:""},
+        {y:"2022",pct:100,c:"#16A266",l:"Clean",ev:""},
+        {y:"2021",pct:100,c:"#16A266",l:"Clean",ev:"Auto loan added"},
+        {y:"2020",pct:100,c:"#16A266",l:"Clean",ev:"Home loan start"}],
+  scoring:{bureauRaw:782,bureauProvider:"CIBIL",bureauNorm:80,internal:87,gap:7,bureauWt:51.8,internalWt:48.2,adjusted:83},
+  score:83,band:"A",pillars:[94,92,88,95],
+  drivers:[{t:"Zero DPD across 6-year bureau history",s:"+12",p:1},
+           {t:"FOIR 21% — strong headroom",s:"+10",p:1},
+           {t:"Credit utilisation 18% — low",s:"+8",p:1},
+           {t:"Low enquiry velocity (0 in 3M)",s:"+6",p:1}],
+  fraud:"Green",foir:21,
+  incomeEng:{
+    method:"ITR-Verified",
+    hierarchy:"ITR available — income is VERIFIED. No estimation required. EMI-back shown as cross-check only.",
+    tradelines:[
+      {type:"Home Loan",cat:"Secured",emi:18000,vintage:"Mar 2022",n:3.0,g:8,ss:0.90,foirPct:40,impliedSanction:45000,incomeToday:56700,wt:0.90},
+      {type:"Auto Loan",cat:"Secured",emi:6000,vintage:"Jan 2023",n:2.2,g:8,ss:0.70,foirPct:45,impliedSanction:13333,incomeToday:15787,wt:0.70},
+      {type:"Credit Card",cat:"Card",emi:null,vintage:"Jun 2022",n:2.8,g:6,ss:0.35,foirPct:null,impliedSanction:40000,incomeToday:47240,wt:0.35,cardLimit:80000,cardMultiple:2.0,cardTier:"Tier-1 entry"}
+    ],
+    emiBkComposite:"₹40,315",
+    itr:"₹1,20,000",aa:null,
+    finalFormula:"Verified Income = ITR ₹1,20,000 / mo (latest filing). EMI-back cross-check: ₹40,315 (within range — no conflict).",
+    finalCalc:"FOIR denominator = ITR income ₹1,20,000. EMI-back ₹40,315 is a bureau cross-check — not blended in.",
+    range:{floor:120000,ceiling:120000},gap:0,gapPct:0,
+    conf:"High",pctile:50,foirDenom:120000,
+    confNote:"ITR verified (latest filing). Income is known — ₹1,20,000/mo. Bureau EMI-back ₹40,315 is a sanity cross-check showing no conflict. Zero uncertainty range."
+  },
+  eInc:"₹1,20,000 (ITR Verified)",eConf:"High",eBand:"High",incNum:120000,foir:20,
+  category:"Premium",
+  products:[
+    {n:"Premium Savings Account",i:"🏦",t:"premium",d:"Zero-balance waiver · Relationship pricing · Dedicated RM",lim:null},
+    {n:"High-Limit Credit Card",i:"💳",t:"premium",d:"2× monthly income. Premium rewards, lounge access.",lim:"₹2,40,000"},
+    {n:"Pre-Approved Personal Loan",i:"📋",t:"premium",d:"30-day offer window post account opening.",lim:"₹5,00,000"},
+    {n:"Sweep-In Fixed Deposit",i:"📈",t:"premium",d:"Auto-park idle balances above ₹50,000.",lim:null}],
+  dec:"Approved — Premium",dtype:"approved",
+  narr:"Six years clean bureau. Low FOIR. ITR-verified income. The engine identifies this as a Band A Premium customer and cross-sells three products at the point of account opening."
+},{
+  id:4,av:"AM",name:"Arun Mehta",sub:"Retail Business Owner · Self-Employed · Ahmedabad",
+  appMeta:{appNo:"APP-2025-00376",cifId:"CIF-49201836",appDate:"09 Mar 2025",
+    channel:"Digital — Mobile App",branch:"Ahmedabad Vastrapur — BR0205",
+    rmCode:"RM-VP-006",pan:"DXMPA5***H",mobile:"99870 ***33",kycStatus:"Video KYC Verified"},
+
+  dem:{Age:"40","Emp. Type":"Self-Employed — Retail","Income Band":"₹5L – ₹10L p.a.","ITR":"Available ✓ (₹62K/mo)","Bureau":"CIBIL"},
+  bureau:{
+    score:692,
+    maxDpdEver:30, maxDpd24m:30, acctsDpd12m:1,
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"11 / 30",
+    dpd:"DPD 30 × 2 — within 24M, resolved",
+    activeEmiTotal:38000, totalAccts:6, activeAccts:2, closedAccts:4,
+    util:68, churnRate:"67%", securedRatio:92, highestTicket:"₹88,000",
+    highestTicketLabel:"HL income at sanction — SE ITR ₹62K verified",
+    vintageYrs:7.0, vintageFlag:false,
+    enq3:2, enq12:7,
+    lenderProfile:"PSU banks (SBI, BOB) — strong SE anchor",
+    goldLoanProxy:null,
+    emi:"₹38,000/mo", limit:"₹80,000", bal:"₹54,400"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"30 days",   c:"amber", n:"DPD 30 twice in 24M — SE cash flow stress"},
+      {l:"Max DPD 24M",      v:"30 days",   c:"amber", n:"Most recent DPD within 24M"},
+      {l:"Accounts DPD 12M", v:"1",         c:"amber", n:"One account with recent stress"},
+      {l:"Write-off",        v:"None",      c:"green", n:"No write-off despite stress events"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹38,000",   c:"red",   n:"Home + business loan — heavy for SE"},
+      {l:"Utilisation",      v:"68%",       c:"red",   n:"High revolving utilisation"},
+      {l:"Secured %",        v:"92%",       c:"green", n:"Both loans secured — home + business"},
+      {l:"Highest Ticket",   v:"₹88,000",   c:"green", n:"HL sanction income — ITR ₹62K confirms range"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"7 yrs",     c:"green", n:"Long history — SE pattern visible"},
+      {l:"Acct Churn",       v:"67%",       c:"green", n:"4 of 6 closed — responsible management"},
+      {l:"Enquiries 12M",    v:"7",         c:"amber", n:"Moderate — SE refinancing expected"},
+      {l:"Lender Tier",      v:"PSU Banks", c:"green", n:"SBI + BOB — strong institutional relationship"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"Clean",     c:"green", n:"ITR + bureau match"},
+      {l:"Adverse Check Score", v:"18",        c:"green", n:"Low adverse risk"},
+      {l:"Enq Velocity",     v:"2 / 3M",    c:"green", n:"Normal SE activity"},
+      {l:"Vintage Flag",     v:"None",      c:"green", n:"No anomaly"},
+    ]
+  },
+  rec:{
+    personaType:"Self-Employed", portfolioType:"Sec",
+    targetFoir:35, headroomEmi:0, cashflow:41080, lendable:0,
+    ccOffer:0, ccAction:"No headroom — FOIR 61% exceeds SE target 44% for Band B · SE · Sec",
+    plOffer:0, upgradeNote:"Submit ITR showing FOIR < 35%. SE secured profile qualifies for review at 6M.",
+    services:["Savings Account","Sweep-in FD","SIP auto-debit","Term Insurance"],
+    creditBlocked:true, blockReason:"FOIR 61% > SE target 44% (Band B · SE · Sec). Adjusted score 59 = Band B — ITR verification would reduce income uncertainty and tighten the FOIR denominator."
+  },
+  rtype:"revolver",
+  hist:[{y:"2024",pct:72,c:"#D97706",l:"Stress",ev:"DPD 30 — EMI 3M delayed"},
+        {y:"2023",pct:80,c:"#D97706",l:"Stress",ev:"DPD 30 — resolved after 45 days"},
+        {y:"2022",pct:95,c:"#0891B2",l:"Good",ev:"Business loan added"},
+        {y:"2021",pct:100,c:"#16A266",l:"Clean",ev:""},
+        {y:"2020",pct:100,c:"#16A266",l:"Clean",ev:"Home loan start"}],
+  scoring:{bureauRaw:692,bureauProvider:"CIBIL",bureauNorm:65,internal:52,gap:13,bureauWt:53.2,internalWt:46.8,adjusted:59},
+  score:59,band:"B",pillars:[54,38,66,78],
+  drivers:[{t:"DPD 30 twice in 24M — recent stress",s:"–14",p:-1},
+           {t:"FOIR 61% on ITR-verified income — exceeds SE threshold (50%)",s:"–12",p:-1},
+           {t:"High credit utilisation (68%)",s:"–8",p:-1},
+           {t:"ITR ₹62K — SE income below business turnover. Conservative.",s:"–5",p:-1}],
+  fraud:"Green",foir:56,
+  incomeEng:{
+    method:"ITR-primary",
+    hierarchy:"ITR available — income is VERIFIED. No estimation required. Bureau EMI-back shown as cross-check.",
+    tradelines:[
+      {type:"Home Loan",cat:"Secured",emi:22000,vintage:"Jun 2020",n:4.8,g:6,ss:0.90,foirPct:50,impliedSanction:44000,incomeToday:55580,wt:0.90},
+      {type:"Business Loan",cat:"Secured",emi:16000,vintage:"Apr 2022",n:3.0,g:6,ss:0.60,foirPct:55,impliedSanction:29091,incomeToday:34662,wt:0.60}
+    ],
+    emiBkComposite:"₹47,100",
+    itr:"₹62,000",aa:null,
+    finalFormula:"Verified Income = ITR ₹62,000/mo. ITR governs. EMI-back ₹47,100 is a cross-check.",
+    finalCalc:"FOIR denominator = ITR ₹62,000. EMI-back ₹47,100 broadly consistent.",
+    range:{floor:62000,ceiling:62000},gap:0,gapPct:0,
+    conf:"Medium",pctile:40,foirDenom:62000,
+    confNote:"ITR verified ₹62,000. Medium confidence due to SE volatility + DPD history."
+  },
+  eInc:"₹62,000 (ITR Verified)",eConf:"Medium",eBand:"Upper-Mid",incNum:62000,foir:61,
+  category:"Cautious",
+  products:[
+    {n:"Standard Savings Account",i:"🏦",t:"cautious",d:"Basic banking access. Standard digital features.",lim:null},
+    {n:"Debit Card Only",i:"💳",t:"cautious",d:"FOIR 61% on verified ITR income exceeds SE threshold (50%). No credit at this time.",lim:null},
+    {n:"Credit Review at 6 Months",i:"📅",t:"upgrade",d:"Eligible if FOIR < 45% and no fresh DPD in 6M.",lim:null}],
+  dec:"Cautious — Debit Only",dtype:"cautious",
+  narr:"ITR verified ₹62,000. FOIR = 61% on ITR income — fires SE override (50% cap). If Arun clears existing EMIs or ITR improves, FOIR drops. Upgrade path: 6M clean bureau + FOIR < 50% on ITR."
+},{
+  id:5,av:"SK",name:"Sneha Kapoor",sub:"Software Developer · First Job · Bangalore",
+  appMeta:{appNo:"APP-2025-00421",cifId:"CIF-91847362",appDate:"15 Mar 2025",
+    channel:"Digital — Mobile App",branch:"Bangalore Koramangala — BR0088",
+    rmCode:"RM-KM-019",pan:"FJTSK8***N",mobile:"87654 ***90",kycStatus:"Video KYC Pending"},
+
+  dem:{Age:"23","Emp. Type":"Salaried — IT Startup (8M)","Income Band":"₹2.5L – ₹5L p.a.","ITR":"Not available","Bureau":"No file — NTC"},
+  bureau:{
+    score:"No file",
+    maxDpdEver:"N/A", maxDpd24m:"N/A", acctsDpd12m:"N/A",
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"N/A — NTC",
+    dpd:"No credit history — NTC path",
+    activeEmiTotal:0, totalAccts:0, activeAccts:0, closedAccts:0,
+    util:"N/A", churnRate:"N/A", securedRatio:"N/A", highestTicket:"N/A",
+    highestTicketLabel:"No tradelines — AA is sole income signal",
+    vintageYrs:0, vintageFlag:true,
+    enq3:0, enq12:0,
+    lenderProfile:"No bureau file — NTC",
+    goldLoanProxy:null,
+    emi:"None", limit:"N/A", bal:"N/A"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"N/A",       c:"ntc",   n:"No credit history — NTC"},
+      {l:"Max DPD 24M",      v:"N/A",       c:"ntc",   n:"NTC path"},
+      {l:"Accounts DPD 12M", v:"N/A",       c:"ntc",   n:"NTC path"},
+      {l:"Write-off",        v:"N/A",       c:"ntc",   n:"NTC path"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹0",        c:"green", n:"Zero obligations — clean start"},
+      {l:"Utilisation",      v:"N/A",       c:"ntc",   n:"No credit extended"},
+      {l:"Secured %",        v:"N/A",       c:"ntc",   n:"No tradelines"},
+      {l:"Highest Ticket",   v:"N/A",       c:"ntc",   n:"AA is sole income signal"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"No file",   c:"ntc",   n:"NTC — 8M employment, AA verified"},
+      {l:"Acct Churn",       v:"N/A",       c:"ntc",   n:"No accounts"},
+      {l:"Enquiries 12M",    v:"0",         c:"green", n:"Clean — no applications"},
+      {l:"Lender Tier",      v:"None",      c:"ntc",   n:"No lender relationship yet"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"Clean",     c:"green", n:"Aadhaar + employer verification"},
+      {l:"Adverse Check Score", v:"12",        c:"green", n:"Clean — new profile, no adverse signals."},
+      {l:"Enq Velocity",     v:"0 / 3M",    c:"green", n:"No enquiries"},
+      {l:"Vintage Flag",     v:"NTC",       c:"ntc",   n:"Expected — first job"},
+    ]
+  },
+  rec:{
+    personaType:"NTC/Clean", portfolioType:"Clean",
+    targetFoir:42, headroomEmi:15820, cashflow:21847, lendable:12656,
+    ccOffer:18984, ccAction:"NEW entry credit card offer: ₹19,000 limit (NTC starter)", existingCcLimit:0,
+    plOffer:253122,
+    upgradeNote:"Month 7 auto-review: consistent salary credit + clean account → upgrade CC and PL.",
+    services:["Salary Savings Account","Recurring Deposit","Term Insurance"],
+    creditBlocked:false, blockReason:""
+  },
+  rtype:"ntc",
+  hist:[{y:"2024",pct:0,c:"#6E56CF",l:"NTC",ev:"No credit footprint — NTC path active"},
+        {y:"2023",pct:0,c:"#6E56CF",l:"NTC",ev:"AA bank credits consistent ₹35–40K/mo"}],
+  scoring:{bureauRaw:null,bureauProvider:"NTC",bureauNorm:null,internal:68,gap:null,bureauWt:null,internalWt:null,adjusted:68},
+  score:68,band:"NTC",pillars:[70,88,45,92],
+  drivers:[{t:"Zero FOIR — no obligations (clean start)",s:"+15",p:1},
+           {t:"AA bank credits consistent ₹35–40K for 8 months",s:"+10",p:1},
+           {t:"Adverse checks — all clear",s:"+8",p:1},
+           {t:"No bureau history — NTC ceiling applied (max 70)",s:"–15",p:-1}],
+  fraud:"Green",foir:0,
+  incomeEng:{
+    method:"AA-primary",
+    hierarchy:"AA available — salary credits verified directly. No estimation required. Income is the AA 6-month average.",
+    tradelines:[],
+    emiBkComposite:null,
+    itr:null,aa:"₹37,667 avg (6M: Oct ₹37,200 · Nov ₹37,500 · Dec ₹38,000 · Jan ₹37,500 · Feb ₹38,200 · Mar ₹37,600)",
+    finalFormula:"Verified Income = AA 6M average = ₹37,667/mo. Variance ₹800 (2.1%) — consistent salary credit pattern confirmed.",
+    finalCalc:"FOIR denominator = ₹37,667. AA-verified ₹37,667 used directly. NTC cap applies to credit products, not income figure.",
+    range:{floor:37667,ceiling:37667},gap:0,gapPct:0,
+    conf:"High",pctile:50,foirDenom:37667,
+    confNote:"AA verified. Income ₹37,667 is known, not estimated. NTC score ceiling (70) applies to risk band — independent of income verification quality."
+  },
+  eInc:"₹37,667 (AA Verified)",eConf:"High",eBand:"Mid",incNum:37667,foir:0,
+  category:"NTC Starter",
+  products:[
+    {n:"Salary Savings Account",i:"🏦",t:"ntc",d:"Employer-linked. Zero balance. Salary auto-credit.",lim:null},
+    {n:"Debit Card + Full UPI",i:"💳",t:"ntc",d:"Full digital banking. No credit at onboarding.",lim:null},
+    {n:"Entry CC at Month 7",i:"📅",t:"upgrade",d:"Auto-review: consistent salary + good standing → Entry CC.",lim:null}],
+  dec:"Approved — NTC Starter",dtype:"ntc",
+  narr:"No bureau file — NTC path fires. Account Aggregator is the income proof. Salary account today, auto-upgrade at month 7 with no branch visit needed."
+},{
+  id:6,av:"RK",name:"Rajesh Kumar",sub:"Suspected Synthetic Identity",
+  appMeta:{appNo:"APP-2025-00409",cifId:"CIF-UNVERIFIED",appDate:"14 Mar 2025",
+    channel:"Digital — Web",branch:"Mumbai Andheri — BR0047",
+    rmCode:"RM-AN-011",pan:"UNVERIFIED",mobile:"99*** ***99",kycStatus:"⚠ KYC Mismatch — Hold"},
+
+  dem:{Age:"30","Emp. Type":"Private Sector (Unverified)","Income Band":"₹5L – ₹10L p.a.","ITR":"Not available","Bureau":"694 — name mismatch ⚠"},
+  bureau:{
+    score:"694 ⚠",
+    maxDpdEver:0, maxDpd24m:0, acctsDpd12m:0,
+    writeoffFlag:false, writeoffAmt:0, dpdScore:"FRAUD OVERRIDE",
+    dpd:"Suspiciously clean — synthetic flag",
+    activeEmiTotal:22000, totalAccts:3, activeAccts:3, closedAccts:0,
+    util:72, churnRate:"0%", securedRatio:0, highestTicket:"N/A",
+    highestTicketLabel:"Adverse override — all income signals blocked",
+    vintageYrs:3.0, vintageFlag:true,
+    enq3:6, enq12:6,
+    lenderProfile:"Unknown — identity mismatch, PAN name discrepancy",
+    goldLoanProxy:null,
+    emi:"₹22,000/mo", limit:"₹90,000", bal:"₹64,800"
+  },
+  bureauVars:{
+    repayment:[
+      {l:"Max DPD Ever",     v:"0",         c:"amber", n:"Suspiciously clean — synthetic flag"},
+      {l:"Max DPD 24M",      v:"0",         c:"amber", n:"Artificially clean — no real repayment history"},
+      {l:"Accounts DPD 12M", v:"0",         c:"amber", n:"Synthetic file — too clean"},
+      {l:"Write-off",        v:"None",      c:"amber", n:"No write-off — but identity unverified"},
+    ],
+    finCapacity:[
+      {l:"Active EMI",       v:"₹22,000",   c:"red",   n:"Unverifiable — identity mismatch"},
+      {l:"Utilisation",      v:"72%",       c:"red",   n:"High balance on suspicious accounts"},
+      {l:"Secured %",        v:"0%",        c:"red",   n:"All unsecured — adverse pattern"},
+      {l:"Highest Ticket",   v:"N/A",       c:"red",   n:"Adverse override — all signals blocked"},
+    ],
+    stability:[
+      {l:"Bureau Vintage",   v:"3 yrs",     c:"red",   n:"Thin file — all accounts opened together"},
+      {l:"Acct Churn",       v:"0%",        c:"red",   n:"No closures — stacking pattern"},
+      {l:"Enquiries 12M",    v:"6",         c:"red",   n:"6 enquiries across 4 lenders in 7 days"},
+      {l:"Vintage Flag",     v:"⚠ Flag",    c:"red",   n:"All accounts same start date"},
+    ],
+    fraudOverlay:[
+      {l:"Identity",         v:"⚠ Mismatch",c:"red",   n:"PAN name ≠ bureau name"},
+      {l:"Adverse Check Score", v:"78",        c:"red",   n:"Exceeds red threshold (65) — hard override"},
+      {l:"Enq Velocity",     v:"6 / 3M",    c:"red",   n:"Velocity flag — 6 enquiries across 4 lenders in 7 days"},
+      {l:"Vintage Flag",     v:"⚠ Synthetic",c:"red",  n:"Mobile linked to multiple PAN applications"},
+    ]
+  },
+  rec:{
+    personaType:"Adverse", portfolioType:"N/A",
+    targetFoir:null, headroomEmi:0, cashflow:0, lendable:0,
+    ccOffer:0, ccAction:"Adverse override — all blocked",
+    plOffer:0, upgradeNote:"Branch visit required. Original documents for identity verification.",
+    services:[],
+    creditBlocked:true, blockReason:"Adverse check Red override — score 78, identity mismatch"
+  },
+  rtype:"suspected",
+  hist:[{y:"2024",pct:0,c:"#DC3545",l:"Adverse Flag",ev:"6 enquiries across 4 lenders in 7 days"},
+        {y:"2023",pct:100,c:"#16A266",l:"Clean",ev:"Suspiciously clean — synthetic flag"},
+        {y:"2022",pct:100,c:"#16A266",l:"Clean",ev:"No bureau activity matches PAN name"}],
+  scoring:{bureauRaw:694,bureauProvider:"CIBIL",bureauNorm:66,internal:null,gap:null,bureauWt:null,internalWt:null,adjusted:null},
+  score:null,band:"REJECT",pillars:[0,0,0,0],
+  drivers:[{t:"Adverse check composite: 78 — exceeds Red threshold (65)",s:"⛔",p:-1},
+           {t:"PAN name ≠ Bureau name — identity mismatch",s:"⛔",p:-1},
+           {t:"6 enquiries / 4 lenders / 7 days — velocity flag",s:"⛔",p:-1},
+           {t:"Mobile linked to multiple PAN applications",s:"⛔",p:-1}],
+  fraud:"Red",foir:null,
+  incomeEng:{
+    method:"Blocked",
+    hierarchy:"Adverse check override fires before income engine activates. No tradeline analysis performed.",
+    tradelines:[],
+    emiBkComposite:null,floor:null,
+    itr:null,aa:null,
+    finalFormula:"⛔ Adverse check Red — income engine bypassed entirely",
+    finalCalc:"No computation performed. Hard reject applied.",
+    conf:"N/A",confNote:"Adverse override — all signals blocked"
+  },
+  eInc:"Unverifiable",eConf:"N/A",eBand:"—",incNum:0,
+  category:"Rejected",
+  products:[
+    {n:"All Products Rejected",i:"🚫",t:"blocked",d:"Hard reject — adverse check override. No products offered.",lim:null},
+    {n:"Branch Visit Required",i:"🏛️",t:"blocked",d:"Original documents for manual identity verification.",lim:null}],
+  dec:"REJECTED — Adverse Override",dtype:"rejected",
+  narr:"Adverse check override fires before the credit engine starts. Composite score 78 exceeds Red threshold of 65. All scoring bypassed. The system flags this for compliance review before any account is opened."
+},{
+  id:7,av:"TK",name:"Tejash",sub:"MSME Owner · Self-Employed · Ahmedabad",
+  appMeta:{appNo:"APP-2025-00434",cifId:"CIF-38291047",appDate:"17 Mar 2025",
+    channel:"Digital — Mobile App",branch:"Ahmedabad Satellite — BR0211",
+    rmCode:"RM-ST-003",pan:"ATKPT6***Z",mobile:"98988 ***14",kycStatus:"Video KYC Verified"},
+
+  dem:{Age:"38","Emp. Type":"Self-Employed — MSME","Income Band":"\u20B910L \u2013 \u20B915L p.a.","ITR":"Not available","Bureau":"CRIF"},
+  bureau:{score:694,maxDpdEver:0,maxDpd24m:0,acctsDpd12m:0,writeoffFlag:false,writeoffAmt:0,dpdScore:"28 / 30",dpd:"Zero DPD on all 29 accounts. Charge write-off Rs10,000 (ECL CC closure) — IsWriteOff=False, PrincipalWO=0. Fee waiver on closure, not a default.",activeEmiTotal:22623,totalAccts:29,activeAccts:3,closedAccts:26,util:"N/A",churnRate:"86%",securedRatio:81,highestTicket:"Rs10,00,000",highestTicketLabel:"Property Loan Ujjivan SFB. EMI=0 interest-only suspected. Flag for review.",vintageYrs:3.5,vintageFlag:true,enq3:0,enq12:2,lenderProfile:"Central Bank PSU (gold+GECL) + HDB NBFC (PL) + Ujjivan SFB (property) MSME trader",goldLoanProxy:1746000,emi:"Rs22,623/mo",limit:"Rs18,89,000",bal:"Rs17,08,050"},
+  rtype:"revolver",
+  hist:[{y:"2025",pct:100,c:"#16A266",l:"Clean",ev:"PL + EdLoan + Property current"},{y:"2024",pct:100,c:"#16A266",l:"Clean",ev:"10 gold loans closed cleanly Aug 2024"},{y:"2023",pct:95,c:"#0891B2",l:"Good",ev:"GECL + 2W closed clean"},{y:"2022",pct:100,c:"#16A266",l:"Clean",ev:"Property loan started Ujjivan SFB"},{y:"2021",pct:88,c:"#0891B2",l:"Good",ev:"Batch opened 27 accounts same date (bureau flag)"}],
+  scoring:{bureauRaw:694,bureauProvider:"CRIF",bureauNorm:66,internal:88,gap:22,bureauWt:55.5,internalWt:44.5,adjusted:76},
+  score:76,band:"A",pillars:[92,82,68,88],
+  drivers:[{t:"Zero DPD across all 29 accounts — exemplary repayment",s:"+14",p:1},{t:"Rs17.5L gold + GECL closed cleanly — MSME capacity confirmed",s:"+10",p:1},{t:"Property loan Rs10L + 81% secured portfolio — asset-backed profile",s:"+8",p:1},{t:"3.5yr vintage + 27/29 same start date — bureau completeness flag",s:"-8",p:-1},{t:"SE no ITR — income unverified, provisional denominator",s:"-6",p:-1}],
+  fraud:"Green",foir:39,
+  incomeEng:{
+    method:"Bureau EMI-back",
+    hierarchy:"No ITR. SE MSME. Bureau-only. Property EMI=0 excluded. Case 2b PL-only estimate Rs33,253 is 43% below declared floor Rs58,333. A_lo used as provisional denominator.",
+    tradelines:[
+      {type:"Personal Loan",cat:"Unsecured",emi:14494,vintage:"Sep 2021",n:3.5,g:4,ss:0.32,foirPct:50,impliedSanction:28988,incomeToday:33253,wt:0.32},
+      {type:"Education Loan",cat:"Secured",emi:8129,vintage:"Sep 2021",n:3.5,g:4,ss:0.35,foirPct:40,impliedSanction:29377,incomeToday:33700,wt:0.35},
+      {type:"Property Loan",cat:"Secured",emi:0,vintage:"Sep 2021",n:3.5,g:6,ss:0,foirPct:50,impliedSanction:0,incomeToday:0,wt:0}
+    ],
+    emiBkComposite:"Rs33,253",
+    itr:null,aa:null,
+    finalFormula:"Case 2b: B=Rs33,253 < A_lo=Rs58,333 gap 43%>30%. Bureau thin for SE MSME. Use A_lo=Rs58,333 as provisional floor. ITR required.",
+    finalCalc:"Provisional income Rs58,333/mo. FOIR = Rs22,623 / Rs58,333 = 39%. SE cap 50% PASS. Credit withheld pending ITR.",
+    range:{floor:33253,ceiling:87500},gap:54247,gapPct:163,
+    conf:"Medium-Low",pctile:35,foirDenom:58333,
+    confNote:"SE MSME no ITR. PL-only gives Rs33,253 Case 2b gap 43%. Property EMI=0 unresolved. Gold Rs17.5L + GECL confirm business. A_lo Rs58,333 provisional."
+  },
+  eInc:"Rs58,333 (Provisional)",eConf:"Medium-Low",eBand:"Upper-Mid",incNum:58333,foir:39,
+  category:"MassAff",
+  bureauVars:{
+    repayment:[{l:"Max DPD Ever",v:"0 Clean",c:"green",n:"Zero delinquency all 29 accounts"},{l:"Max DPD 24M",v:"0",c:"green",n:"Perfect recent history"},{l:"Accounts DPD 12M",v:"0",c:"green",n:"All current"},{l:"Write-off",v:"None",c:"green",n:"IsWriteOff=False, PrincipalWO=0. Rs10K = fee waiver on closure — not a credit default."}],
+    finCapacity:[{l:"Active EMI",v:"Rs22,623",c:"green",n:"PL Rs14,494 + EdLoan Rs8,129. Prop EMI=0."},{l:"Utilisation",v:"N/A",c:"neutral",n:"No active revolving credit (CC/OD). Balance/HC on term loans = repayment progress, not utilisation."},{l:"Secured %",v:"81%",c:"green",n:"Property + gold + GECL dominate"},{l:"Highest Ticket",v:"Rs10,00,000",c:"green",n:"Property loan Ujjivan SFB EMI=0 anomaly"}],
+    stability:[{l:"Bureau Vintage",v:"3.5 yrs",c:"amber",n:"Short. All Sep 2021 or later."},{l:"Acct Churn",v:"86%",c:"green",n:"25/29 closed cleanly gold as liquidity"},{l:"Enquiries 12M",v:"2",c:"green",n:"Very low disciplined"},{l:"Vintage Flag",v:"Same date",c:"amber",n:"27/29 share Sep 2021 start date"}],
+    fraudOverlay:[{l:"Identity",v:"Clean",c:"green",n:"No mismatch"},{l:"Adverse Check Score",v:"24",c:"green",n:"Low adverse risk"},{l:"Enq Velocity",v:"0 / 3M",c:"green",n:"No recent enquiries"},{l:"Vintage Flag",v:"Data flag",c:"amber",n:"Same start date bureau completeness check"}]
+  },
+  rec:{
+    personaType:"Self-Employed",portfolioType:"Sec",
+    targetFoir:44,headroomEmi:0,cashflow:29167,lendable:0,
+    ccOffer:0,ccAction:"No credit at onboarding ITR required. FOIR 39% < target 44% but SE income unverified.",
+    existingCcLimit:0,plOffer:0,
+    upgradeNote:"Submit ITR. With verified income Rs58,333+/mo FOIR 39% < SE target 44% headroom unlocks. Gold assets suggest higher income ITR likely upgrades to Mass Affluent.",
+    services:["Savings Account","Current Account (SE)","Sweep-in FD","SIP auto-debit"],
+    creditBlocked:true,blockReason:"SE policy: ITR required before credit extension. Income provisional. Score 88 Band A — ITR submission unlocks Mass Affluent full suite."
+  },
+  products:[{n:"Savings + Current Account",i:"🏦",t:"standard",d:"SE relationship. Zero-balance savings + business current.",lim:null},{n:"Sweep-in FD",i:"📈",t:"standard",d:"Auto-park gold liquidation proceeds above Rs50,000.",lim:null},{n:"Credit 90-day ITR Window",i:"📅",t:"upgrade",d:"Submit ITR. SE Band B Sec. CC2 + PL2 eligible. OD against property possible.",lim:null}],
+  dec:"Mass Affluent — Account Open · Credit Unlocks on ITR",dtype:"approved",
+  narr:"MSME trader zero DPD on 29 accounts Rs17.5L gold closed cleanly GECL repaid. Short 3.5yr vintage WO Rs10K SE no ITR. Declared Rs10-15L credible for this asset profile. Account opens today. 90-day ITR window on submission FOIR 39% passes SE target 44% and CC2 + PL2 unlock immediately."
+}];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TARGET FOIR MATRIX  (Persona Type × Risk Band × Portfolio Type)
+// Source: Knight Fintech credit policy
+// ─────────────────────────────────────────────────────────────────────────────
+const TARGET_FOIR={
+  "Salaried High":{
+    A:{Sec:58,Mix:52,Unsec:46},B:{Sec:52,Mix:46,Unsec:40},
+    C:{Sec:42,Mix:36,Unsec:null},D:null},
+  "Salaried Mid":{
+    A:{Sec:52,Mix:46,Unsec:40},B:{Sec:46,Mix:40,Unsec:35},
+    C:{Sec:38,Mix:32,Unsec:null},D:null},
+  "Salaried Entry":{
+    A:{Sec:46,Mix:40,Unsec:35},B:{Sec:40,Mix:35,Unsec:30},
+    C:null,D:null},
+  "Self-Employed":{
+    A:{Sec:50,Mix:44,Unsec:38},B:{Sec:44,Mix:38,Unsec:32},
+    C:{Sec:35,Mix:null,Unsec:null},D:null},
+  "NTC/Clean":{
+    A:{Clean:42},B:{Clean:36},NTC:{Clean:42},C:null,D:null},
+  "Retired/Fixed":{
+    A:{Sec:50,Clean:50},B:{Sec:44,Clean:44},C:{Flat:38},D:null}
+};
+
+function getPersonaType(p){
+  if(p.rtype==="ntc")return"NTC/Clean";
+  if(p.rtype==="suspected")return"FRAUD";
+  if(p.dem&&p.dem["Emp. Type"]&&p.dem["Emp. Type"].includes("Self"))return"Self-Employed";
+  if(p.incNum>=100000)return"Salaried High";
+  if(p.incNum>=50000)return"Salaried Mid";
+  return"Salaried Entry";
+}
+function getPortfolioType(p){
+  if(p.rtype==="ntc")return"Clean";
+  const s=p.bureau.securedRatio;
+  if(typeof s!=="number")return"Clean";
+  if(s>=70)return"Sec";
+  if(s>=30)return"Mix";
+  return"Unsec";
+}
+function lookupTargetFoir(personaType,band,portfolioType){
+  const pt=TARGET_FOIR[personaType];
+  if(!pt)return null;
+  const bd=pt[band];
+  if(!bd)return null;
+  return bd[portfolioType]??bd["Flat"]??bd["Clean"]??null;
+}
+
+const LOAN_MULT={A:28,B:25,C:20,D:0,NTC:20,REJECT:0};
+const REVOLVER_MULT={A:2.0,B:2.0,C:1.5,D:0,NTC:1.5,REJECT:0};
+const LENDABLE_FRAC={"High":0.80,"Medium-High":0.75,"Medium":0.65,"Medium-Low":0.50,"Low":0.35,"N/A":0};
+const CONF_PCT={"High":0.50,"Medium-High":0.48,"Medium":0.40,"Medium-Low":0.35,"Low":0.30,"N/A":0.30};
+function incTier(inc){
+  if(inc<25000)return't1';
+  if(inc<50000)return't2';
+  if(inc<100000)return't3';
+  if(inc<200000)return't4';
+  return't5';
+}
+
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THEME MAPS
+// ─────────────────────────────────────────────────────────────────────────────
+const BC={
+  A:{c:"#0D7A4E",bg:"rgba(13,122,78,0.08)"},
+  B:{c:"#0369A1",bg:"rgba(3,105,161,0.08)"},
+  C:{c:"#B45309",bg:"rgba(180,83,9,0.08)"},
+  D:{c:"#B91C1C",bg:"rgba(185,28,28,0.08)"},
+  NTC:{c:"#5B21B6",bg:"rgba(91,33,182,0.08)"},
+  REJECT:{c:"#B91C1C",bg:"rgba(185,28,28,0.1)"}};
+const TC={
+  premium:{c:"#C05B0A",bg:"rgba(192,91,10,0.08)"},
+  standard:{c:"#0369A1",bg:"rgba(3,105,161,0.08)"},
+  ntc:{c:"#5B21B6",bg:"rgba(91,33,182,0.08)"},
+  cautious:{c:"#B45309",bg:"rgba(180,83,9,0.08)"},
+  restricted:{c:"#B91C1C",bg:"rgba(185,28,28,0.08)"},
+  blocked:{c:"#64748B",bg:"rgba(100,116,139,0.06)"},
+  upgrade:{c:"#0D7A4E",bg:"rgba(13,122,78,0.07)"},
+  cross:{c:"#1D4ED8",bg:"rgba(29,78,216,0.08)"}};
+const FC={Green:"#0D7A4E",Amber:"#B45309",Red:"#B91C1C"};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let CP=0,CS=0;
+const STEPS=["Risk Assessment","Income Analysis","Product Decision"];
+let tms=[];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCORE BLOCK — replaces semicircle gauge
+// ─────────────────────────────────────────────────────────────────────────────
+function scoreBlock(p, compact=false){
+  const bi=BC[p.band];
+  const sc=p.scoring||{};
+  const adjScore = sc.adjusted??p.score??null;
+  const intScore = sc.internal??null;
+  const normScore = sc.bureauNorm??null;
+  const pillars=["Repayment","Fin. Capacity","Stability","Adverse Checks"];
+  const weights=["40%","30%","20%","10%"];
+  const hasScoring = sc.bureauRaw || sc.bureauNorm!==undefined;
+  const isNTC = p.band==="NTC";
+  const isREJECT = p.band==="REJECT";
+
+  // Score tier mini-block (used in both compact + full)
+  function scoreTiers(){
+    if(isREJECT) return '';
+    const bw  = sc.bureauWt;
+    const iw  = sc.internalWt;
+    const gap = sc.gap;
+    const hasWeights = bw !== null && bw !== undefined;
+    const weightNote = isNTC
+      ? 'NTC — internal only'
+      : hasWeights && gap === 0
+        ? 'Equal weight (no gap)'
+        : hasWeights
+          ? `Gap ${gap}pt → Bureau ${bw}% · Internal ${iw}%`
+          : '50 / 50 base';
+    return`<div style="width:100%;display:flex;flex-direction:column;gap:5px;margin-top:4px">
+      <!-- Three score tiles -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">
+        <!-- Bureau Normalised -->
+        <div style="padding:7px 8px;border-radius:6px;background:rgba(15,45,82,0.04);border:1px solid rgba(15,45,82,0.10);text-align:center">
+          <div style="font-size:8px;font-weight:700;color:var(--mu);letter-spacing:.05em;margin-bottom:3px">BUREAU NORM</div>
+          <div style="font-size:${compact?'16px':'18px'};font-weight:800;color:var(--mu);font-family:var(--fn)">${isNTC?'—':normScore!==null?normScore:'—'}</div>
+          <div style="font-size:8px;color:var(--mu);margin-top:2px;line-height:1.3">${isNTC?'No file':(sc.bureauProvider||'')+(sc.bureauRaw?' · '+sc.bureauRaw:'')}</div>
+          ${hasWeights&&!isNTC?`<div style="margin-top:3px;font-size:8px;font-weight:700;color:var(--mu);background:rgba(15,45,82,0.07);border-radius:3px;padding:1px 4px">Wt: ${bw}%</div>`:''}
+        </div>
+        <!-- Internal Risk Score -->
+        <div style="padding:7px 8px;border-radius:6px;background:rgba(3,105,161,0.05);border:1px solid rgba(3,105,161,0.14);text-align:center">
+          <div style="font-size:8px;font-weight:700;color:#0369A1;letter-spacing:.05em;margin-bottom:3px">INTERNAL SCORE</div>
+          <div style="font-size:${compact?'16px':'18px'};font-weight:800;color:#0369A1;font-family:var(--fn)">${intScore!==null?intScore:'—'}</div>
+          <div style="font-size:8px;color:var(--mu);margin-top:2px;line-height:1.3">Last 12M only</div>
+          ${hasWeights&&!isNTC?`<div style="margin-top:3px;font-size:8px;font-weight:700;color:#0369A1;background:rgba(3,105,161,0.08);border-radius:3px;padding:1px 4px">Wt: ${iw}%</div>`:''}
+        </div>
+        <!-- Adjusted Risk Score -->
+        <div style="padding:7px 8px;border-radius:6px;background:${bi.bg};border:1px solid ${bi.c}38;text-align:center">
+          <div style="font-size:8px;font-weight:700;color:${bi.c};letter-spacing:.05em;margin-bottom:3px">ADJUSTED SCORE</div>
+          <div style="font-size:${compact?'16px':'18px'};font-weight:800;color:${bi.c};font-family:var(--fn)">${adjScore!==null?adjScore:'—'}</div>
+          <div style="font-size:8px;color:var(--mu);margin-top:2px;line-height:1.3">Final · drives Band</div>
+          ${hasWeights&&!isNTC?`<div style="margin-top:3px;font-size:8px;font-weight:700;color:${bi.c};background:${bi.c}12;border-radius:3px;padding:1px 4px">= weighted avg</div>`:''}
+        </div>
+      </div>
+      <!-- Weight logic note -->
+      <div style="padding:5px 8px;border-radius:4px;background:rgba(15,45,82,0.03);border:1px solid var(--bdr);font-size:8px;color:var(--mu);line-height:1.5;text-align:center">
+        ${isNTC
+          ? 'NTC — no bureau file. Internal score only.'
+          : hasWeights && gap > 0
+            ? `<strong style="color:var(--navy)">Dynamic weighting:</strong> ${gap}-pt gap → bureau earns +${((bw-50)).toFixed(1)}% extra weight · Bureau ${bw}% + Internal ${iw}% = ${adjScore}`
+            : hasWeights
+              ? '<strong style="color:var(--navy)">Equal weighting:</strong> no gap between bureau norm and internal score · 50% + 50%'
+              : '—'
+        }
+      </div>
+    </div>`;
+  }
+
+  if(compact){
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+      <div style="text-align:center">
+        <div style="font-family:var(--fn);font-size:52px;font-weight:800;line-height:1;color:${bi.c}">${adjScore??'—'}</div>
+        <div style="font-size:10px;color:var(--mu);margin-top:2px">Adjusted Risk Score</div>
+      </div>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:6px;background:${bi.bg};border:1px solid ${bi.c}38;font-family:var(--fn);font-size:12px;font-weight:700;color:${bi.c}">
+        Band ${p.band} &nbsp;·&nbsp; ${p.band==="NTC"?"New to Credit":p.band==="REJECT"?"Adverse Override":["Low Risk","Moderate Risk","Elevated Risk","High Risk"][["A","B","C","D"].indexOf(p.band)]||""}
+      </div>
+      ${scoreTiers()}
+      <div style="width:100%;display:flex;flex-direction:column;gap:5px">
+        ${pillars.map((l,i)=>`
+        <div style="display:flex;align-items:center;gap:7px">
+          <div style="font-size:9px;color:var(--mu);width:72px;flex-shrink:0">${l}</div>
+          <div style="flex:1;height:4px;border-radius:2px;background:rgba(15,45,82,0.05);overflow:hidden">
+            <div style="width:${p.pillars[i]}%;height:100%;background:${bi.c};border-radius:2px"></div>
+          </div>
+          <div style="font-size:9px;font-weight:700;color:${bi.c};width:22px;text-align:right">${p.pillars[i]}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Full version for Screen 1 right panel
+  return`<div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%">
+    <div style="position:relative;width:100%;display:flex;flex-direction:column;align-items:center;padding:16px 12px;border-radius:var(--r);background:${bi.bg};border:1px solid ${bi.c}2A">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:${bi.c};opacity:.7;margin-bottom:6px">Adjusted Risk Score</div>
+      <div style="font-family:var(--fn);font-size:64px;font-weight:800;line-height:1;color:${bi.c}">${adjScore??'—'}</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:4px">out of 100</div>
+      <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;padding:5px 16px;border-radius:6px;background:${bi.c}18;border:1px solid ${bi.c}40;font-family:var(--fn);font-size:13px;font-weight:700;color:${bi.c}">
+        Band ${p.band} &nbsp;·&nbsp; ${p.band==="NTC"?"New to Credit":p.band==="REJECT"?"Adverse Override":["Low Risk","Moderate Risk","Elevated Risk","High Risk"][["A","B","C","D"].indexOf(p.band)]||""}
+      </div>
+    </div>
+    ${scoreTiers()}
+    <div style="width:100%;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:2px">Internal Score Pillars &nbsp;(${weights.join(' · ')})</div>
+      ${pillars.map((l,i)=>`
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:10px;color:var(--mu);width:82px;flex-shrink:0">${l}</div>
+        <div style="flex:1;height:5px;border-radius:2px;background:rgba(15,45,82,0.05);overflow:hidden">
+          <div style="width:${p.pillars[i]}%;height:100%;background:${bi.c};border-radius:2px"></div>
+        </div>
+        <div style="font-size:10px;font-weight:700;color:${bi.c};width:22px;text-align:right">${p.pillars[i]}</div>
+      </div>`).join('')}
+    </div>
+    <div style="width:100%;padding:8px 10px;border-radius:5px;background:rgba(15,45,82,0.03);border:1px solid var(--bdr);font-size:9px;color:var(--mu);line-height:1.6">
+      <strong style="color:var(--navy)">Scoring method:</strong> Bureau raw score (${sc.bureauProvider||'N/A'} ${sc.bureauRaw||''}) normalised 0–100. Internal score built from last 12M bureau behaviour across 4 pillars. Adjusted score = weighted average — base 50/50, shifting +2.5% toward bureau per 10-point gap between the two. Bureau earns more weight when it diverges, because it carries more data points.
+    </div>
+  </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 1: Profile + Score
+// ─────────────────────────────────────────────────────────────────────────────
+function r1(p){
+  const bi=BC[p.band];
+  const ava_c={A:"#16A266",B:"#0891B2",C:"#D97706",D:"#DC3545",NTC:"#6E56CF",REJECT:"#DC3545"}[p.band]||"#F47B20";
+  const fc_c=p.foir===null?"#5B7A9D":p.foir<36?"#16A266":p.foir<51?"#0891B2":p.foir<61?"#D97706":"#DC3545";
+  const rt=p.rtype;
+  const rtInfo={
+    transactor:{ico:"↩",lbl:"Transactor",desc:"Pays outstanding balance in full each month. Low utilisation, no revolving interest. Lowest risk profile.",c:"var(--gr)",bg:"var(--grb)",bc:"rgba(14,166,111,0.2)"},
+    revolver:{ico:"↻",lbl:"Revolver",desc:"Carries balance month-to-month. Utilisation is a key risk driver. Higher interest burden signals capacity stress.",c:"var(--am)",bg:"var(--amb)",bc:"rgba(217,119,6,0.2)"},
+    ntc:{ico:"★",lbl:"New to Credit",desc:"No prior credit bureau footprint. NTC path activated — scored via Account Aggregator and alternate signals.",c:"var(--pu)",bg:"var(--pub)",bc:"rgba(124,58,237,0.2)"},
+    suspected:{ico:"⚠",lbl:"Suspected Synthetic",desc:"Identity signals inconsistent. Velocity flag detected. Hard override — adverse checks take precedence.",c:"var(--re)",bg:"var(--reb)",bc:"rgba(185,28,28,0.18)"}
+  }[rt]||{ico:"?",lbl:"Unknown",desc:"",c:"var(--mu)",bg:"rgba(90,112,153,0.08)",bc:"rgba(90,112,153,0.2)"};
+
+  document.getElementById("s1c").innerHTML=`
+<div class="s1grid fadein">
+
+  <!-- LEFT: Application record card -->
+  <div class="card pcard" style="padding:14px;gap:8px">
+
+    <!-- App header strip -->
+    <div style="width:100%;padding:8px 10px;border-radius:6px;background:var(--navy);display:flex;flex-direction:column;gap:2px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:var(--fm);font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.04em">${p.appMeta?.appNo||'—'}</span>
+        <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,0.10);color:rgba(255,255,255,0.7)">${p.appMeta?.appDate||'—'}</span>
+      </div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.45)">${p.appMeta?.channel||'—'}</div>
+    </div>
+
+    <!-- Applicant identity -->
+    <div style="display:flex;align-items:center;gap:10px;width:100%;padding:6px 0">
+      <div class="ava" style="background:${ava_c};width:44px;height:44px;font-size:13px;flex-shrink:0">${p.av}</div>
+      <div style="min-width:0">
+        <div class="pname" style="font-size:13px">${p.name}</div>
+        <div class="psub" style="font-size:10px">${p.sub}</div>
+        <div style="font-family:var(--fm);font-size:9px;color:var(--mu);margin-top:2px">${p.appMeta?.cifId||'—'}</div>
+      </div>
+    </div>
+    <div class="hdiv" style="width:100%"></div>
+
+    <!-- Application fields -->
+    <div style="width:100%;display:flex;flex-direction:column;gap:5px">
+      ${[
+        ['Branch',  p.appMeta?.branch||'—'],
+        ['RM Code', p.appMeta?.rmCode||'—'],
+        ['PAN',     p.appMeta?.pan||'—'],
+        ['Mobile',  p.appMeta?.mobile||'—'],
+        ['KYC',     p.appMeta?.kycStatus||'—'],
+      ].map(([l,v])=>`
+      <div class="prow">
+        <span class="prl">${l}</span>
+        <span class="prv" style="${l==='KYC'&&v.includes('⚠')?'color:#B91C1C;font-weight:700':
+          l==='KYC'&&v.includes('Pending')?'color:#B45309;font-weight:600':''}">${v}</span>
+      </div>`).join('')}
+    </div>
+    <div class="hdiv" style="width:100%"></div>
+
+    <!-- Application details from dem -->
+    <div style="width:100%;display:flex;flex-direction:column;gap:5px">
+      ${Object.entries(p.dem).map(([l,v])=>`
+      <div class="prow">
+        <span class="prl">${l}</span>
+        ${l==='Income Band'
+          ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:4px;background:rgba(244,123,32,0.10);color:#C05B0A;border:1px solid rgba(244,123,32,0.25)">${v}</span>`
+          : `<span class="prv">${v}</span>`
+        }
+      </div>`).join('')}
+    </div>
+    <div class="hdiv" style="width:100%"></div>
+
+    <div style="width:100%;display:flex;justify-content:space-between;align-items:center">
+      <span class="lbl">Adverse Checks</span>
+      <span class="tag" style="background:${FC[p.fraud]+'18'};color:${FC[p.fraud]};border:1px solid ${FC[p.fraud]+'40'}">${p.fraud==="Red"?"🔴 Red":p.fraud==="Amber"?"🟡 Amber":"🟢 Green"}</span>
+    </div>
+  </div>
+
+  <!-- MIDDLE: Bureau analytics + history + revolver/transactor -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+
+    <!-- Bureau — Pillar-based derived variables -->
+    <div class="card bpanel">
+      <div class="bpanel-title">
+        <div style="width:6px;height:6px;border-radius:50%;background:#6E56CF"></div>
+        <span class="lbl">Key Insights</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:5px">
+          <span style="font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(91,33,182,0.08);color:#5B21B6">${p.bureau.totalAccts} accts</span>
+          <span style="font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(91,33,182,0.08);color:#5B21B6">${p.bureau.vintageYrs > 0 ? p.bureau.vintageYrs + 'yr' : 'NTC'}</span>
+          <span style="font-size:8px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(91,33,182,0.08);color:#5B21B6">Score ${p.bureau.score}</span>
+        </div>
+      </div>
+
+      ${(()=>{
+        const bv = p.bureauVars;
+        if(!bv) return '';
+
+        const pillars = [
+          {key:'repayment',  label:'Repayment',       color:'#0D7A4E', bg:'rgba(13,122,78,0.06)'},
+          {key:'finCapacity',label:'Fin. Capacity',   color:'#0369A1', bg:'rgba(3,105,161,0.06)'},
+          {key:'stability',  label:'Stability',       color:'#B45309', bg:'rgba(180,83,9,0.06)'},
+          {key:'fraudOverlay',label:'Adverse Checks',  color:'#5B21B6', bg:'rgba(91,33,182,0.06)'},
+        ];
+
+        const cMap = {
+          green:'#0D7A4E', amber:'#B45309', red:'#B91C1C',
+          ntc:'#5B21B6',   neutral:'#64748B'
+        };
+        const bgMap = {
+          green:'rgba(13,122,78,0.06)',  amber:'rgba(180,83,9,0.06)',
+          red:'rgba(185,28,28,0.06)',    ntc:'rgba(91,33,182,0.06)',
+          neutral:'rgba(100,116,139,0.04)'
+        };
+
+        return pillars.map(pl => {
+          const vars = bv[pl.key] || [];
+          return '<div style="margin-bottom:8px">'+
+            '<div style="font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+pl.color+';margin-bottom:5px;padding:3px 6px;border-radius:3px;background:'+pl.bg+'">'+pl.label+'</div>'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
+            vars.map(v => {
+              const c = cMap[v.c] || '#64748B';
+              const bg = bgMap[v.c] || 'rgba(100,116,139,0.04)';
+              return '<div style="padding:5px 8px;border-radius:5px;background:'+bg+';border:1px solid '+c+'1A;display:flex;justify-content:space-between;align-items:baseline;gap:4px">'+
+                '<span style="font-size:8px;color:var(--mu);flex-shrink:0">'+v.l+'</span>'+
+                '<span style="font-size:9px;font-weight:700;color:'+c+';text-align:right;line-height:1.2">'+v.v+'</span>'+
+              '</div>';
+            }).join('')+
+            '</div>'+
+          '</div>';
+        }).join('');
+      })()}
+
+      <!-- Persona type strip -->
+      <div class="rtrow" style="background:${rtInfo.bg};border-color:${rtInfo.bc};margin-top:4px">
+        <div class="rt-ic" style="background:${rtInfo.c}22;font-size:14px;color:${rtInfo.c}">${rtInfo.ico}</div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:${rtInfo.c}">${rtInfo.lbl}</div>
+          <div class="rt-desc">${rtInfo.desc}</div>
+        </div>
+      </div>
+    </div>
+    <!-- Credit history -->
+    <div class="card" style="padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+        <div style="width:6px;height:6px;border-radius:50%;background:#D97706"></div>
+        <span class="lbl">Credit History — Repayment Timeline</span>
+      </div>
+      ${p.hist.map(h=>`
+      <div class="hist-row">
+        <div class="hist-yr">${h.y}</div>
+        <div class="hist-track" style="${h.pct===0?'background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2)':''}">
+          ${h.pct>0?`<div class="hist-fill" style="width:${h.pct}%;background:${h.c}22;border-right:2px solid ${h.c}"></div>`:''}
+        </div>
+        <div class="hist-tag" style="color:${h.c}">${h.l}</div>
+        ${h.ev?`<div class="hist-ev" style="font-size:9px;color:var(--mu);padding-left:6px;flex:1">${h.ev}</div>`:''}
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- RIGHT: Score + pillars + drivers -->
+  <div class="card spanel">
+    ${scoreBlock(p)}
+
+
+    <div class="hdiv" style="width:100%"></div>
+
+    <!-- Drivers -->
+    <div style="width:100%">
+      <div class="lbl" style="margin-bottom:8px">Key Score Drivers</div>
+      ${p.drivers.map(d=>`
+      <div class="drv-item">
+        <div class="drv-dot" style="background:${d.p>0?'#0D7A4E':'#B91C1C'}"></div>
+        <div class="drv-txt">${d.t}</div>
+        <div class="drv-pts" style="color:${d.p>0?'#0D7A4E':'#B91C1C'}">${d.s}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+</div>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 2: Income Estimation / Verification
+// Rule: If doc available (ITR/AA/Form16) → show VERIFIED panel. No estimation.
+//       If no doc → bureau-only EMI-back estimator + persona adjustment.
+// ─────────────────────────────────────────────────────────────────────────────
+function r2(p){
+  const eng=p.incomeEng;
+  const isBlocked=eng.method==="Blocked";
+  const isVerified=["ITR-Verified","AA-Verified","Form16-Verified"].includes(eng.method);
+  const hasTL=eng.tradelines&&eng.tradelines.length>0;
+  const confColor={High:"#0D7A4E","Medium-High":"#0D7A4E","Medium-Low":"#B45309",Medium:"#B45309",Low:"#B91C1C","N/A":"#64748B"}[eng.conf]||"#64748B";
+  const fc_c=p.foir===null?"#64748B":p.foir<36?"#0D7A4E":p.foir<51?"#0369A1":p.foir<61?"#B45309":"#B91C1C";
+  const methodColor={"ITR-Verified":"#0369A1","Form16-Verified":"#0369A1","AA-Verified":"#0D7A4E","Bureau EMI-back":"#B45309","Blocked":"#B91C1C"}[eng.method]||"#64748B";
+  const bi=BC[p.band];
+  const fmt=n=>n!=null?'₹'+Math.round(n).toLocaleString('en-IN'):'—';
+  const r=eng.range||{};
+
+  const personaLabel={
+    transactor:"Transactor — pays in full. Strong signal on existing tradelines.",
+    revolver:"Revolver — carries balance. Conservative confidence applied.",
+    ntc:"NTC — no tradelines. Bureau estimation not possible. Pull AA.",
+    suspected:"Suspected synthetic. Bureau engine bypassed."
+  }[p.rtype]||"";
+
+  const personaMultiplier={
+    transactor:{label:"Transactor / MNC Salaried",uplift:"+5% confidence",color:"#0D7A4E"},
+    revolver:{label:"Revolver / Private Salaried",uplift:"No uplift",color:"#B45309"},
+    ntc:{label:"NTC — estimation not possible",uplift:"N/A",color:"#5B21B6"},
+    suspected:{label:"Suspected synthetic",uplift:"Blocked",color:"#B91C1C"}
+  }[p.rtype]||{label:"Unknown",uplift:"N/A",color:"#64748B"};
+
+  // Build tradeline rows HTML for cross-check (verified mode)
+  function tlCrossCheck(){
+    if(!hasTL) return '';
+    const rows=eng.tradelines.map((t,i)=>{
+      const isCard=t.cat==="Card";
+      return '<tr style="background:'+(i%2===0?'var(--bg)':'#FFF')+';border-bottom:1px solid var(--bdr)">'+
+        '<td style="padding:4px 6px;color:var(--mu)">'+t.type+'<div style="font-size:8px;color:var(--di)">'+(isCard?t.cardTier:t.cat)+'</div></td>'+
+        '<td style="padding:4px 6px;text-align:center;color:var(--mu)">'+(isCard?'—':fmt(t.emi))+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;color:var(--mu)">'+(isCard?t.cardMultiple+'×':t.foirPct+'%')+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;color:#0369A1">'+t.g+'%</td>'+
+        '<td style="padding:4px 6px;text-align:right;color:var(--mu)">'+fmt(t.incomeToday)+'</td>'+
+        '</tr>';
+    }).join('');
+    return '<div class="card" style="padding:14px 16px">'+
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">'+
+        '<div style="width:6px;height:6px;border-radius:50%;background:#94A3B8"></div>'+
+        '<span class="lbl" style="color:var(--mu)">Bureau EMI-back — Cross-check Only</span>'+
+        '<span style="font-size:8px;padding:2px 6px;border-radius:3px;background:rgba(100,116,139,0.08);color:#64748B;font-weight:700;margin-left:auto">NOT USED IN FOIR</span>'+
+      '</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:9px">'+
+        '<thead><tr style="background:rgba(100,116,139,0.1)">'+
+          '<th style="padding:4px 6px;text-align:left;color:var(--mu);font-weight:700">Tradeline</th>'+
+          '<th style="padding:4px 6px;text-align:center;color:var(--mu);font-weight:700">EMI</th>'+
+          '<th style="padding:4px 6px;text-align:center;color:var(--mu);font-weight:700">FOIR/Multi</th>'+
+          '<th style="padding:4px 6px;text-align:center;color:var(--mu);font-weight:700">g%</th>'+
+          '<th style="padding:4px 6px;text-align:right;color:var(--mu);font-weight:700">Implied Today</th>'+
+        '</tr></thead>'+
+        '<tbody>'+rows+'</tbody>'+
+      '</table>'+
+      '<div style="margin-top:8px;padding:6px 10px;background:var(--bg);border-radius:4px;border:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="font-size:9px;color:var(--mu)">EMI-back composite (cross-check)</span>'+
+        '<span style="font-size:11px;font-weight:700;color:var(--mu);font-family:var(--fn)">'+(eng.emiBkComposite||'—')+'</span>'+
+      '</div>'+
+      '<div style="margin-top:6px;padding:6px 10px;border-radius:4px;background:rgba(13,122,78,0.05);border:1px solid rgba(13,122,78,0.15)">'+
+        '<span style="font-size:9px;color:#0D7A4E;font-weight:600">'+eng.finalCalc+'</span>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // Build tradeline rows for bureau estimation mode
+  function tlEstimateTable(){
+    if(!hasTL) return '<div class="card" style="padding:14px 16px"><div class="lbl" style="margin-bottom:8px">Bureau EMI-back Estimator</div><div style="padding:14px;text-align:center;border-radius:6px;background:var(--bg);border:1px dashed var(--bdr2);font-size:10px;color:var(--mu)">No tradelines found. Bureau estimation not possible.</div></div>';
+    const rows=eng.tradelines.map((t,i)=>{
+      const isCard=t.cat==="Card";
+      const ssC=t.ss>=0.7?"#0369A1":t.ss>=0.4?"#B45309":"#B91C1C";
+      return '<tr style="background:'+(i%2===0?'var(--bg)':'#FFF')+';border-bottom:1px solid var(--bdr)">'+
+        '<td style="padding:5px 6px"><div style="font-weight:600;color:var(--navy);font-size:10px">'+t.type+'</div><div style="font-size:9px;color:var(--mu)">'+(isCard?t.cardTier:t.cat)+'</div></td>'+
+        '<td style="padding:5px 6px;text-align:center;color:var(--mu);font-size:9px">'+t.vintage+'</td>'+
+        '<td style="padding:5px 6px;text-align:center;font-weight:700;color:var(--navy)">'+t.n+'</td>'+
+        '<td style="padding:5px 6px;text-align:center;font-weight:700;color:#0369A1">'+t.g+'%</td>'+
+        '<td style="padding:5px 6px;text-align:center;color:var(--mu);font-size:9px">'+(isCard?t.cardMultiple+'×':t.foirPct+'%')+'</td>'+
+        '<td style="padding:5px 6px;text-align:right;color:var(--mu);font-size:9px">'+fmt(t.impliedSanction)+'</td>'+
+        '<td style="padding:5px 6px;text-align:right;font-weight:700;color:var(--navy);font-size:10px">'+fmt(t.incomeToday)+'</td>'+
+        '<td style="padding:5px 6px;text-align:center">'+
+          '<div style="height:3px;width:34px;margin:0 auto;background:var(--bdr);border-radius:2px;overflow:hidden"><div style="width:'+(t.ss*100)+'%;height:100%;background:'+ssC+'"></div></div>'+
+          '<div style="font-size:9px;color:'+ssC+';font-weight:700;margin-top:1px">'+t.ss+'</div>'+
+        '</td></tr>';
+    }).join('');
+    return '<div class="card" style="padding:14px 16px">'+
+      '<div class="lbl" style="margin-bottom:10px">Bureau EMI-back Estimator — Tradelines</div>'+
+      '<table style="width:100%;border-collapse:collapse;font-size:10px">'+
+        '<thead><tr style="background:var(--navy)">'+
+          '<th style="padding:5px 6px;text-align:left;color:#FFF;font-weight:700">Loan / Card</th>'+
+          '<th style="padding:5px 6px;text-align:center;color:#FFF;font-weight:700">Vintage</th>'+
+          '<th style="padding:5px 6px;text-align:center;color:#FFF;font-weight:700">n</th>'+
+          '<th style="padding:5px 6px;text-align:center;color:#FFF;font-weight:700">g</th>'+
+          '<th style="padding:5px 6px;text-align:center;color:#FFF;font-weight:700">FOIR/Multi</th>'+
+          '<th style="padding:5px 6px;text-align:right;color:#FFF;font-weight:700">At Sanction</th>'+
+          '<th style="padding:5px 6px;text-align:right;color:#FFF;font-weight:700">Implied Today</th>'+
+          '<th style="padding:5px 6px;text-align:center;color:#FFF;font-weight:700">SS</th>'+
+        '</tr></thead>'+
+        '<tbody>'+rows+'</tbody>'+
+      '</table>'+
+      '<div style="margin-top:9px;padding:7px 10px;border-radius:5px;background:rgba(244,123,32,0.07);border:1px solid rgba(244,123,32,0.2);display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="font-size:9px;color:var(--mu)">Σ(Implied Today × Signal Strength) ÷ Σ(Signal Strength)</span>'+
+        '<span style="font-size:13px;font-weight:800;color:#B45309;font-family:var(--fn)">'+eng.emiBkComposite+'</span>'+
+      '</div>'+
+      '<div style="margin-top:7px;font-size:10px;color:var(--mu);line-height:1.5;padding:8px 10px;background:var(--bg);border-radius:5px;border:1px solid var(--bdr)">'+
+        '<strong style="color:var(--navy)">Formula:</strong> '+eng.finalFormula+
+        '<div style="border-top:1px solid var(--bdr);margin-top:5px;padding-top:5px;color:#B45309;font-weight:600">'+eng.finalCalc+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  const leftCol = isBlocked ?
+    '<div class="card" style="padding:20px;text-align:center;grid-column:1/3"><div style="font-size:28px;margin-bottom:8px">⛔</div><div style="font-size:13px;font-weight:700;color:#B91C1C">Adverse Check Override</div><div style="font-size:10px;color:var(--mu);margin-top:6px;line-height:1.5">Income engine bypassed entirely. Hard reject applied before any computation.</div></div>'
+    : isVerified ?
+    '<div style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="card" style="padding:14px 16px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+          '<div class="lbl" style="color:#0D7A4E">Verified Income Source</div>'+
+          '<div style="font-size:11px;font-weight:700;color:#0369A1">'+eng.method.replace(/-/g,' ')+'</div>'+
+        '</div>'+
+        '<div style="padding:8px 10px;border-radius:6px;background:rgba(13,122,78,0.05);border:1px solid rgba(13,122,78,0.2);font-size:10px;color:var(--mu);line-height:1.5">'+eng.hierarchy+'</div>'+
+      '</div>'+
+      '<div class="card" style="padding:16px">'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bdr)">'+
+          '<div style="width:7px;height:7px;border-radius:50%;background:#0D7A4E"></div>'+
+          '<span class="lbl" style="color:#0D7A4E">Verified Monthly Income</span>'+
+        '</div>'+
+        '<div style="padding:14px 16px;border-radius:8px;background:rgba(13,122,78,0.05);border:2px solid rgba(13,122,78,0.3);text-align:center;margin-bottom:12px">'+
+          '<div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#0D7A4E;opacity:.7;margin-bottom:6px">VERIFIED — EXACT INCOME</div>'+
+          '<div style="font-family:var(--fn);font-size:40px;font-weight:800;line-height:1;color:#0D7A4E">'+fmt(r.floor)+'</div>'+
+          '<div style="font-size:10px;color:var(--mu);margin-top:4px">per month · used as FOIR denominator · zero uncertainty</div>'+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--mu);padding:9px 12px;background:var(--bg);border-radius:5px;border:1px solid var(--bdr);line-height:1.6">'+
+          '<strong style="color:var(--navy)">Formula: </strong>'+eng.finalFormula+
+        '</div>'+
+      '</div>'+
+      tlCrossCheck()+
+    '</div>'
+    :
+    '<div style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="card" style="padding:12px 14px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+          '<div class="lbl">Estimation Method</div>'+
+          '<div style="font-size:11px;font-weight:700;color:#B45309">'+eng.method+'</div>'+
+        '</div>'+
+        '<div style="padding:8px 10px;border-radius:6px;background:rgba(180,83,9,0.05);border:1px solid rgba(180,83,9,0.2);font-size:10px;color:var(--mu);line-height:1.5">'+eng.hierarchy+'</div>'+
+      '</div>'+
+      tlEstimateTable()+
+    '</div>';
+
+  const midCol = isBlocked ? '' :
+    '<div style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="card" style="padding:14px 16px">'+
+        '<div class="lbl" style="margin-bottom:8px">Persona Type</div>'+
+        '<div style="padding:10px 12px;border-radius:7px;background:'+bi.bg+';border:1px solid '+bi.c+'30;margin-bottom:10px">'+
+          '<div style="font-size:10px;font-weight:700;color:'+personaMultiplier.color+';margin-bottom:4px">'+personaMultiplier.label+'</div>'+
+          '<div style="font-size:10px;color:var(--mu);line-height:1.4">'+personaLabel+'</div>'+
+          (isVerified
+            ? '<div style="margin-top:6px;font-size:9px;font-weight:700;color:#0D7A4E">✓ Verified doc — persona affects products, not income</div>'
+            : '<div style="margin-top:6px;font-size:9px;font-weight:700;color:'+personaMultiplier.color+'">Confidence adjustment: '+personaMultiplier.uplift+'</div>'+
+              '<div style="margin-top:4px;font-size:9px;color:#B91C1C;font-weight:600">⚠ No verified document — bureau EMI-back only</div>'
+          )+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:5px">'+
+          [
+            {lbl:"Latest ITR / Form 16",avail:!!eng.itr,note:eng.itr||"Not available"},
+            {lbl:"Account Aggregator (AA)",avail:!!eng.aa,note:eng.aa||"Not pulled"},
+            {lbl:"Bureau Tradelines",avail:hasTL,note:hasTL?eng.tradelines.length+" tradeline(s)":"None"}
+          ].map(d=>
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:6px 8px;border-radius:5px;background:'+(d.avail?'rgba(13,122,78,0.06)':'rgba(100,116,139,0.06)')+';border:1px solid '+(d.avail?'rgba(13,122,78,0.18)':'rgba(203,213,225,0.7)')+'">'+
+              '<span style="font-size:10px;font-weight:600;color:'+(d.avail?'#0D7A4E':'var(--mu)')+'">'+( d.avail?'✓ ':'○ ')+d.lbl+'</span>'+
+              '<span style="font-size:9px;color:'+(d.avail?'#0D7A4E':'var(--mu)')+';text-align:right;max-width:130px;line-height:1.3">'+d.note+'</span>'+
+            '</div>'
+          ).join('')+
+        '</div>'+
+      '</div>'+
+      '<div class="card" style="padding:14px 16px">'+
+        '<div class="lbl" style="margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--bdr)">'+(isVerified?'Verified Income':'Estimated Income (Bureau-only)')+'</div>'+
+        '<div style="padding:12px 14px;border-radius:7px;background:'+(isVerified?'rgba(13,122,78,0.06)':'rgba(180,83,9,0.06)')+';border:2px solid '+(isVerified?'rgba(13,122,78,0.3)':'rgba(180,83,9,0.25)')+';text-align:center;margin-bottom:10px">'+
+          '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+(isVerified?'#0D7A4E':'#B45309')+';margin-bottom:5px">'+(isVerified?'VERIFIED — EXACT':'ESTIMATED — BUREAU ONLY')+'</div>'+
+          '<div style="font-family:var(--fn);font-size:32px;font-weight:800;color:'+(isVerified?'#0D7A4E':'#B45309')+'">'+fmt(r.floor)+'</div>'+
+          '<div style="font-size:10px;color:var(--mu);margin-top:2px">/ month · FOIR denominator</div>'+
+        '</div>'+
+        '<div style="padding:8px 10px;border-radius:5px;background:'+(isVerified?'rgba(13,122,78,0.05)':'rgba(180,83,9,0.05)')+';border:1px solid '+(isVerified?'rgba(13,122,78,0.18)':'rgba(180,83,9,0.18)')+'">'+
+          '<div style="font-size:10px;font-weight:700;color:'+confColor+';margin-bottom:2px">Confidence: '+eng.conf+'</div>'+
+          '<div style="font-size:9px;color:var(--mu);line-height:1.4">'+eng.confNote+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card" style="padding:14px 16px">'+
+        '<div class="lbl" style="margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--bdr)">FOIR — Fixed Obligation to Income</div>'+
+        '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">'+
+          '<div style="font-family:var(--fn);font-size:34px;font-weight:800;color:'+fc_c+'">'+(p.foir!==null?p.foir+'%':'N/A')+'</div>'+
+          '<div style="font-size:10px;color:var(--mu)">'+(isVerified?'EMI ÷ verified income':'EMI ÷ estimated income')+'</div>'+
+        '</div>'+
+        '<div style="height:5px;border-radius:3px;background:linear-gradient(to right,#0D7A4E 0%,#0369A1 35%,#B45309 60%,#B91C1C 80%);position:relative;margin-bottom:10px">'+
+          (p.foir!==null?'<div style="position:absolute;top:-5px;left:'+Math.min(p.foir,100)+'%;transform:translateX(-50%);width:2px;height:15px;background:var(--navy);border-radius:1px"></div>':'')+
+        '</div>'+
+        [['<36%','Comfortable','#0D7A4E',p.foir!==null&&p.foir<36],
+         ['36–60%','Moderate','#0369A1',p.foir!==null&&p.foir>=36&&p.foir<61],
+         ['>60%','Hard override — no credit','#B91C1C',p.foir!==null&&p.foir>60]
+        ].map(([rv,l,c,a])=>
+          '<div style="display:flex;gap:7px;padding:4px 8px;border-radius:4px;background:'+(a?c+'0D':'transparent')+';border:1px solid '+(a?c+'28':'transparent')+';margin-bottom:3px;align-items:center">'+
+            '<div style="width:5px;height:5px;border-radius:50%;background:'+c+';opacity:'+(a?1:.2)+';flex-shrink:0"></div>'+
+            '<span style="font-size:9px;font-weight:'+(a?700:400)+';color:'+(a?c:'var(--di)')+'">'+rv+' — '+l+'</span>'+
+          '</div>'
+        ).join('')+
+        (p.foir!==null&&p.foir>60?'<div style="margin-top:6px;padding:7px 10px;border-radius:5px;background:rgba(185,28,28,0.05);border:1px solid rgba(185,28,28,0.2);font-size:10px;color:#B91C1C;font-weight:600">⛔ Hard override — zero credit products</div>':'')+
+      '</div>'+
+    '</div>';
+
+  const rightCol =
+    '<div style="display:flex;flex-direction:column;gap:10px">'+
+      '<div class="card" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px">'+
+        scoreBlock(p,true)+
+      '</div>'+
+      '<div class="card" style="padding:13px 14px">'+
+        '<div class="lbl" style="margin-bottom:7px">Summary</div>'+
+        [
+          {l:"Mode",v:eng.method.replace(/-/g,' '),c:methodColor},
+          {l:"Adverse Checks",v:p.fraud,c:FC[p.fraud]},
+          {l:"Income",v:fmt(r.floor)+(isVerified?' ✓':' (est.)'),c:isVerified?'#0D7A4E':'#B45309'},
+          {l:"FOIR",v:p.foir===null?'N/A':p.foir+'%',c:p.foir===null?'#64748B':p.foir<36?'#0D7A4E':p.foir<61?'#B45309':'#B91C1C'},
+          {l:"Confidence",v:eng.conf,c:confColor},
+          {l:"Denominator",v:fmt(eng.foirDenom),c:"var(--navy)"}
+        ].map(g=>
+          '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr)">'+
+            '<span style="font-size:10px;color:var(--mu)">'+g.l+'</span>'+
+            '<span style="font-size:10px;font-weight:700;color:'+g.c+';font-family:var(--fm)">'+g.v+'</span>'+
+          '</div>'
+        ).join('')+
+      '</div>'+
+      '<div class="card" style="padding:12px 14px">'+
+        '<div class="lbl" style="margin-bottom:6px">Income Engine Logic</div>'+
+        '<div style="font-size:10px;color:var(--mu);line-height:1.7">'+
+          '<strong style="color:#0D7A4E">Doc available →</strong> Use directly. No estimation. EMI-back = cross-check only.<br>'+
+          '<strong style="color:#B45309">No doc →</strong> Bureau EMI-back: EMI ÷ FOIR_orig × (1+g)^n, weighted by signal strength.<br>'+
+          ''+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById("s2c").innerHTML=
+    '<div style="display:grid;grid-template-columns:1fr 1fr 270px;gap:12px" class="fadein">'+
+      leftCol+
+      (isBlocked?'':midCol)+
+      rightCol+
+    '</div>';
+}
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 3: Decision Matrix + Products
+// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// SCREEN 3: Recommendation — Score · Matrix · FOIR · Products
+// ─────────────────────────────────────────────────────────────────────────────
+function r3(p){
+  const bi=BC[p.band];
+  const rec=p.rec||{};
+  const fmt=n=>n>0?'₹'+Math.round(n).toLocaleString('en-IN'):'—';
+  const fmtp=n=>n!=null?n+'%':'—';
+  const E=p.incNum||0;
+  const O=p.bureau.activeEmiTotal||0;
+  const curFoir=p.foir||0;
+
+  // ── derived ──────────────────────────────────────────────────────────────
+  const personaType=getPersonaType(p);
+  const portfolioType=getPortfolioType(p);
+  const targetFoir=lookupTargetFoir(personaType,p.band,portfolioType);
+  const headroomEmi=targetFoir?Math.max(0,(targetFoir/100-curFoir/100)*E):0;
+  const cashflow=targetFoir?Math.round((1-targetFoir/100)*E):Math.round(E*0.55);
+  const lendFrac=LENDABLE_FRAC[p.eConf]||0.50;
+  const lendable=Math.round(headroomEmi*lendFrac);
+  const plOffer=Math.round(lendable*(LOAN_MULT[p.band]||20));
+  const revMult=REVOLVER_MULT[p.band]||1.5;
+  const ccNew=Math.round(lendable*revMult);
+  const existCC=rec.existingCcLimit||0;
+  const ccUpgrade=existCC>0&&ccNew>existCC*1.25;
+  const foirColor=curFoir===null?'#64748B':curFoir<36?'#0D7A4E':curFoir<(targetFoir||60)?'#0369A1':curFoir<60?'#B45309':'#B91C1C';
+
+  // ── CUSTOMER CATEGORY lookup ──────────────────────────────────────────────
+  const CAT_MATRIX={
+    A:{t1:'Standard',t2:'MassAff',t3:'Premium',t4:'Premium',t5:'Premium'},
+    B:{t1:'Starter', t2:'Standard',t3:'MassAff',t4:'MassAff',t5:'Premium'},
+    C:{t1:'Restricted',t2:'Starter',t3:'Standard',t4:'MassAff',t5:'MassAff'},
+    D:{t1:'Restricted',t2:'Restricted',t3:'Starter',t4:'Standard',t5:'Standard'},
+    NTC:{t1:'Starter',t2:'Starter',t3:'Standard',t4:'MassAff',t5:'Premium'},
+    REJECT:{t1:'Rejected',t2:'Rejected',t3:'Rejected',t4:'Rejected',t5:'Rejected'},
+  };
+  function incTier(inc){
+    if(inc<25000)return't1';
+    if(inc<50000)return't2';
+    if(inc<100000)return't3';
+    if(inc<200000)return't4';
+    return't5';
+  }
+  function getCategory(band,inc,emp){
+    const tbl=CAT_MATRIX[band];
+    if(!tbl)return'Rejected';
+    let cat=tbl[incTier(inc)]||'Restricted';
+    // SE step-down
+    if(emp==='Self-Employed'&&cat!=='Rejected'){
+      const order=['Rejected','Restricted','Starter','Standard','MassAff','Premium'];
+      const idx=order.indexOf(cat);
+      cat=idx>1?order[idx-1]:cat;
+    }
+    return cat;
+  }
+  const category=getCategory(p.band,E,p.dem&&p.dem['Emp. Type']&&p.dem['Emp. Type'].includes('Self')?'Self-Employed':'Salaried');
+  const CAT_COLORS={Premium:'#C05B0A',MassAff:'#0369A1',Standard:'#5B21B6',Starter:'#0D7A4E',Restricted:'#B45309',Rejected:'#B91C1C'};
+  const CAT_LABELS={Premium:'Premium',MassAff:'Mass Affluent',Standard:'Standard',Starter:'Starter',Restricted:'Restricted',Rejected:'Rejected'};
+  const CAT_DESC={
+    Premium:'Dedicated RM · Relationship pricing · Full product wallet',
+    MassAff:'Digital-first · Shared RM pool · Broad product suite',
+    Standard:'Self-serve · Branch · Core retail suite',
+    Starter:'Digital onboarding · Auto-upgrade at Month 7',
+    Restricted:'Account only · 6M review cycle · Clear upgrade path',
+    Rejected:'Hard block · Branch visit for identity verification'
+  };
+  const catColor=CAT_COLORS[category]||'#64748B';
+  const catLabel=CAT_LABELS[category]||category;
+  const catDesc=CAT_DESC[category]||'';
+
+  // ── PRODUCT ELIGIBILITY ───────────────────────────────────────────────────
+  // [eligible, condition note]
+  function prodElig(cat,hasHeadroom,lendAmt,cashflow,portfolioType,hasCC,emp,hasITR){
+    const isSE=emp==='Self-Employed';
+    const isMixSec=portfolioType==='Sec'||portfolioType==='Mix';
+    const hw=lendAmt>0; // has headroom after lendable
+    const cf1=cashflow>=100000, cf2=cashflow>=60000, cf3=cashflow>=30000, cf4=cashflow>=20000;
+
+    const p_={};
+    // Banking — always (unless Rejected)
+    if(cat==='Rejected'){
+      return {SA:'✗',CA:'✗',FD:'✗',SI:'✗',RD:'✗',CC:'✗',OD:'✗',PL:'✗',HL:'✗',AL:'✗',MF:'✗',INS:'✗',WM:'✗',PB:'✗'};
+    }
+    p_.SA=cat==='Restricted'?'Basic':cat==='Starter'?'Basic':cat==='Standard'?'Standard':'Premium';
+    p_.CA=isSE&&cat!=='Restricted'?'✓ (SE/CA)':'—';
+    p_.FD=cat!=='Restricted'&&cat!=='Starter'?'✓':'—';
+    p_.SI=cat==='Premium'||cat==='MassAff'?'✓':'—';
+    p_.RD=cat!=='Restricted'?'✓':'—';
+    // Credit
+    if(cat==='Restricted'){
+      p_.CC='✗ No headroom';p_.OD='✗';p_.PL='✗';
+    } else {
+      // CC
+      if(cat==='Premium')         p_.CC=hasHeadroom?'CC3/CC4 offer':'CC3 (no new headroom)';
+      else if(cat==='MassAff')    p_.CC=hasHeadroom?(isMixSec?'CC2/CC3':'CC2'):'CC2 (no new headroom)';
+      else if(cat==='Standard')   p_.CC=hasHeadroom&&isMixSec?'CC1/CC2':hasHeadroom?'CC1':'CC1 (subject to FOIR)';
+      else if(cat==='Starter')    p_.CC=hasHeadroom?'CC1 (AA req)':'—';
+      // OD
+      p_.OD=isSE&&(cat==='Premium'||cat==='MassAff')&&isMixSec?'✓ Against property/FD':'—';
+      // PL
+      if(cat==='Premium')         p_.PL=hasHeadroom?'PL3'+(lendAmt>500000&&hasITR?' / PL4':''):'PL3 (if FOIR clears)';
+      else if(cat==='MassAff')    p_.PL=hasHeadroom?'PL2/PL3':'PL2 (if FOIR clears)';
+      else if(cat==='Standard')   p_.PL=hasHeadroom&&lendAmt>5000?'PL1/PL2':'PL1 (subject to FOIR)';
+      else if(cat==='Starter')    p_.PL=hasHeadroom?'PL1 (AA+6M)':'—';
+    }
+    p_.HL=cat==='Premium'||cat==='MassAff'?'✓ Referral':'—';
+    p_.AL=cat==='Premium'?'✓ Referral':'—';
+    // Advisory
+    p_.MF=cat==='Premium'||cat==='MassAff'?'✓':'—';
+    p_.INS=cat==='Premium'||cat==='MassAff'?'✓ Full':cat==='Standard'?'✓ Basic term':'—';
+    p_.WM=cat==='Premium'&&cf2?'✓':'—';
+    p_.PB=cat==='Premium'&&cf1?'✓':'—';
+    return p_;
+  }
+  const hasITR=p.incomeEng&&['ITR-Verified','Form16-Verified'].includes(p.incomeEng.method);
+  const elig=prodElig(category,headroomEmi>0,lendable,cashflow,portfolioType,existCC>0,
+    p.dem&&p.dem['Emp. Type']&&p.dem['Emp. Type'].includes('Self')?'Self-Employed':'Salaried',hasITR);
+
+  // ── MATRIX ROWS/COLS ──────────────────────────────────────────────────────
+  const personaRows=['Salaried High','Salaried Mid','Salaried Entry','Self-Employed','NTC/Clean'];
+  const bandCols=['A','B','C','D'];
+  function cellText(pt,band){
+    const bd=TARGET_FOIR[pt];if(!bd)return'—';
+    const bdata=bd[band];if(!bdata)return'Block';
+    if(typeof bdata==='object'){
+      const vals=Object.entries(bdata).filter(([k,v])=>v);
+      return vals.map(([k,v])=>k+':'+v+'%').join(' / ');
+    }
+    return'—';
+  }
+  function catCell(band,tier,emp){
+    const cat=getCategory(band,tier==='t1'?20000:tier==='t2'?35000:tier==='t3'?70000:tier==='t4'?140000:250000,emp);
+    return cat;
+  }
+
+  // ── PRODUCT CARDS ─────────────────────────────────────────────────────────
+  function buildProductCards(){
+    if(p.band==='REJECT')return'<div style="padding:16px;text-align:center;border-radius:8px;background:rgba(185,28,28,0.06);border:1px solid rgba(185,28,28,0.2)"><div style="font-size:22px;margin-bottom:8px">⛔</div><div style="font-size:12px;font-weight:700;color:#B91C1C">Adverse Override</div><div style="font-size:9px;color:var(--mu);margin-top:5px">Branch visit for identity verification.</div></div>';
+    let html='';
+    // FOIR numbers strip
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">'+
+      [['Current FOIR',fmtp(curFoir),foirColor,'EMI÷income'],
+       ['Target FOIR',fmtp(targetFoir),catColor,personaType+' · '+p.band],
+       ['Headroom',headroomEmi>0?fmtp(Math.round((targetFoir||0)-curFoir)):headroomEmi===0&&targetFoir&&curFoir<targetFoir?'0%':'None',headroomEmi>0?'#0D7A4E':'#B45309',headroomEmi>0?fmt(headroomEmi)+'/mo':'No new credit']
+      ].map(([l,v,c,s])=>'<div style="padding:8px 10px;border-radius:6px;background:var(--bg);border:1px solid var(--bdr);text-align:center">'+
+        '<div style="font-size:8px;color:var(--mu);font-weight:600;margin-bottom:3px">'+l+'</div>'+
+        '<div style="font-family:var(--fn);font-size:18px;font-weight:800;color:'+c+'">'+v+'</div>'+
+        '<div style="font-size:8px;color:var(--mu);margin-top:1px;line-height:1.2">'+s+'</div>'+
+      '</div>').join('')+
+    '</div>';
+
+    // FOIR bar
+    html+='<div style="position:relative;height:8px;border-radius:4px;background:linear-gradient(to right,#0D7A4E 0%,#0369A1 36%,#B45309 56%,#B91C1C 76%);margin-bottom:12px">'+
+      (targetFoir?'<div style="position:absolute;top:-3px;left:'+Math.min(targetFoir,100)+'%;transform:translateX(-50%);width:2px;height:14px;background:#0369A1;border-radius:1px;opacity:.8"></div>':'')+
+      (curFoir!==null?'<div style="position:absolute;top:-4px;left:'+Math.min(curFoir,100)+'%;transform:translateX(-50%);width:3px;height:16px;background:'+foirColor+';border-radius:2px;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>':'')+
+    '</div>';
+
+    // Available cashflow callout
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">'+
+      '<div style="padding:8px 10px;border-radius:6px;background:rgba(13,122,78,0.06);border:1px solid rgba(13,122,78,0.18)">'+
+        '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:3px">Available Cashflow</div>'+
+        '<div style="font-family:var(--fn);font-size:16px;font-weight:800;color:#0D7A4E">'+fmt(cashflow)+'</div>'+
+        '<div style="font-size:8px;color:var(--mu);margin-top:1px">/mo after obligations</div>'+
+      '</div>'+
+      '<div style="padding:8px 10px;border-radius:6px;background:rgba(3,105,161,0.06);border:1px solid rgba(3,105,161,0.18)">'+
+        '<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:3px">Lendable Headroom</div>'+
+        '<div style="font-family:var(--fn);font-size:16px;font-weight:800;color:#0369A1">'+fmt(lendable)+'</div>'+
+        '<div style="font-size:8px;color:var(--mu);margin-top:1px">/mo ('+Math.round(lendFrac*100)+'% of headroom)</div>'+
+      '</div>'+
+    '</div>';
+
+    // Credit products
+    if(headroomEmi>0&&lendable>0){
+      html+='<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:5px">Credit Offers</div>'+
+      '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">';
+      if(ccNew>0){
+        const ccLabel=ccUpgrade?'CC Upgrade → '+fmt(ccNew):existCC>0?'Credit Card: '+fmt(existCC):'New Credit Card: '+fmt(ccNew);
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-radius:6px;background:rgba(244,123,32,0.07);border:1px solid rgba(244,123,32,0.20)">'+
+          '<div><div style="font-size:9px;font-weight:700;color:var(--navy)">💳 '+ccLabel+'</div>'+
+          '<div style="font-size:8px;color:var(--mu);margin-top:1px">'+fmt(lendable)+'/mo × '+revMult+'× revolving multiplier</div></div>'+
+          '<div style="font-size:8px;font-weight:700;color:#F47B20">'+elig.CC+'</div>'+
+        '</div>';
+      }
+      if(plOffer>0){
+        html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-radius:6px;background:rgba(29,78,216,0.06);border:1px solid rgba(29,78,216,0.18)">'+
+          '<div><div style="font-size:9px;font-weight:700;color:var(--navy)">📋 Pre-approved Loan: '+fmt(plOffer)+'</div>'+
+          '<div style="font-size:8px;color:var(--mu);margin-top:1px">'+fmt(lendable)+' × '+(LOAN_MULT[p.band]||20)+'× (Band '+p.band+', 36M, 12%) · 30-day offer</div></div>'+
+          '<div style="font-size:8px;font-weight:700;color:#1D4ED8">'+elig.PL+'</div>'+
+        '</div>';
+      }
+      if(elig.HL!=='—'||elig.AL!=='—'){
+        html+='<div style="display:flex;gap:6px">'+
+          (elig.HL!=='—'?'<div style="flex:1;padding:7px 10px;border-radius:6px;background:rgba(91,33,182,0.05);border:1px solid rgba(91,33,182,0.15);font-size:9px;font-weight:700;color:#5B21B6">🏠 Home Loan referral</div>':'')+
+          (elig.AL!=='—'?'<div style="flex:1;padding:7px 10px;border-radius:6px;background:rgba(91,33,182,0.05);border:1px solid rgba(91,33,182,0.15);font-size:9px;font-weight:700;color:#5B21B6">🚗 Auto Loan referral</div>':'')+
+        '</div>';
+      }
+      html+='</div>';
+    } else if(category!=='Rejected'){
+      html+='<div style="padding:8px 10px;border-radius:6px;background:rgba(180,83,9,0.05);border:1px solid rgba(180,83,9,0.15);font-size:9px;color:#B45309;margin-bottom:10px">'+
+        (rec.blockReason||'No credit headroom available.')+
+        (rec.upgradeNote?'<br><span style="color:var(--mu)">'+rec.upgradeNote+'</span>':'')+
+      '</div>';
+    }
+
+    // Banking / service products
+    html+='<div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:5px">Banking & Service Products</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">';
+    const svcProds=[
+      ['🏦 Savings Account', elig.SA, elig.SA!=='✗'],
+      ['💼 Current Account', elig.CA, elig.CA!=='—'],
+      ['📈 Fixed Deposit', elig.FD, elig.FD!=='—'],
+      ['🔄 Sweep-in FD', elig.SI, elig.SI!=='—'],
+      ['📅 Recurring Deposit', elig.RD, elig.RD!=='—'],
+      ['📊 MF / SIP', elig.MF, elig.MF!=='—'],
+      ['🛡️ Insurance', elig.INS, elig.INS!=='—'],
+      ['💎 Wealth Mgmt', elig.WM, elig.WM!=='—'],
+    ];
+    svcProds.forEach(([lbl,val,show])=>{
+      if(!show)return;
+      html+='<div style="padding:5px 8px;border-radius:5px;background:rgba(13,122,78,0.05);border:1px solid rgba(13,122,78,0.13);display:flex;justify-content:space-between;align-items:center">'+
+        '<span style="font-size:8px;color:var(--navy)">'+lbl+'</span>'+
+        '<span style="font-size:8px;font-weight:700;color:#0D7A4E">'+val+'</span>'+
+      '</div>';
+    });
+    html+='</div>';
+    return html;
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  document.getElementById("s3c").innerHTML=`
+<div class="fadein" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;height:100%">
+
+  <!-- COL 1: Score + Category + Target FOIR Matrix -->
+  <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto">
+
+    <!-- Score + Category banner -->
+    <div class="card" style="padding:13px 14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="text-align:center;flex-shrink:0">
+          <div style="font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:3px">Score</div>
+          <div style="font-family:var(--fn);font-size:48px;font-weight:800;line-height:1;color:${bi.c}">${p.score??'—'}</div>
+          <div style="display:inline-flex;padding:2px 9px;border-radius:3px;background:${bi.bg};border:1px solid ${bi.c}30;font-family:var(--fn);font-size:9px;font-weight:700;color:${bi.c};margin-top:4px">Band ${p.band}</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);margin-bottom:4px">Customer Category</div>
+          <div style="padding:8px 10px;border-radius:6px;background:${catColor}12;border:1px solid ${catColor}30">
+            <div style="font-family:var(--fn);font-size:14px;font-weight:800;color:${catColor}">${catLabel}</div>
+            <div style="font-size:8px;color:var(--mu);line-height:1.4;margin-top:3px">${catDesc}</div>
+          </div>
+          <div style="margin-top:5px;display:grid;grid-template-columns:1fr 1fr;gap:3px">
+            ${[['Persona',personaType],['Portfolio',portfolioType],['Income',fmt(E)+'/mo'],['Emp.',p.dem&&p.dem['Emp. Type']?p.dem['Emp. Type'].split('—')[0].trim():'—']].map(([l,v])=>`
+            <div style="font-size:8px;padding:2px 6px;border-radius:3px;background:var(--bg);border:1px solid var(--bdr)">
+              <span style="color:var(--mu)">${l}: </span><span style="font-weight:700;color:var(--navy)">${v}</span>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Matrix (Risk Band × Income Tier) -->
+    <div class="card" style="padding:11px 13px">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+        <div style="width:5px;height:5px;border-radius:50%;background:${catColor}"></div>
+        <span class="lbl">Customer Category Matrix</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:8px">
+          <thead>
+            <tr>
+              <th style="padding:4px 5px;background:var(--navy);color:#FFF;font-weight:700;text-align:left">Band</th>
+              ${['<25K','25–50K','50–100K','100–200K','200K+'].map((t,i)=>`<th style="padding:4px 5px;background:var(--navy);color:#FFF;font-weight:700;text-align:center;min-width:60px">${t}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${['A','B','C','D','NTC'].map((band,ri)=>{
+              return`<tr style="background:${ri%2===0?'var(--bg)':'#FFF'}">
+                <td style="padding:4px 5px;font-weight:700;color:${band===p.band?bi.c:'var(--mu)'};border-right:1px solid var(--bdr)">${band===p.band?'▶ '+band:band}</td>
+                ${['t1','t2','t3','t4','t5'].map(tier=>{
+                  const inc=tier==='t1'?20000:tier==='t2'?35000:tier==='t3'?70000:tier==='t4'?140000:250000;
+                  const cat=getCategory(band,inc,'Salaried');
+                  const hit=band===p.band&&tier===incTier(E);
+                  const cc=CAT_COLORS[cat]||'#64748B';
+                  return`<td style="padding:4px 5px;text-align:center;background:${hit?cc+'22':''};border:${hit?'2px solid '+cc:'1px solid var(--bdr)'};font-weight:${hit?700:400};color:${hit?cc:cc};border-radius:${hit?'3px':'0'}">${CAT_LABELS[cat]||cat}</td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:5px;font-size:8px;color:var(--mu);font-style:italic">SE: −1 tier · Retired: +1 tier · ▶ = customer position</div>
+    </div>
+
+    <!-- Target FOIR Matrix -->
+    <div class="card" style="padding:11px 13px">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#F47B20"></div>
+        <span class="lbl">Target FOIR Matrix (Sec / Mix / Unsec)</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:8px">
+          <thead>
+            <tr>
+              <th style="padding:4px 5px;background:var(--navy);color:#FFF;font-weight:700;text-align:left">Persona Type</th>
+              ${bandCols.map(b=>`<th style="padding:4px 5px;background:${b===p.band?bi.c:'var(--navy)'};color:#FFF;font-weight:700;text-align:center;min-width:80px">${b===p.band?'▶ '+b:b}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${personaRows.map((pt,ri)=>{
+              const hitRow=pt===personaType;
+              return`<tr style="background:${ri%2===0?'var(--bg)':'#FFF'}">
+                <td style="padding:4px 5px;font-weight:${hitRow?700:400};color:${hitRow?bi.c:'var(--mu)'};white-space:nowrap;border-right:1px solid var(--bdr)">${hitRow?'▶ '+pt:pt}</td>
+                ${bandCols.map(b=>{
+                  const hit=hitRow&&b===p.band;
+                  const txt=cellText(pt,b);
+                  return`<td style="padding:4px 5px;text-align:center;background:${hit?bi.c+'22':''};border:${hit?'2px solid '+bi.c:'1px solid var(--bdr)'};font-weight:${hit?700:400};color:${hit?bi.c:txt==='Block'?'#B91C1C':'var(--navy)'};border-radius:${hit?'3px':'0'}">${txt}</td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:5px;font-size:8px;color:var(--mu);font-style:italic">▶ = customer cell (${personaType} · Band ${p.band} · ${portfolioType}) → Target: ${fmtp(targetFoir)}</div>
+    </div>
+  </div>
+
+  <!-- COL 2: Product Eligibility Table -->
+  <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto">
+    <div class="card" style="padding:13px 14px">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:10px">
+        <div style="width:5px;height:5px;border-radius:50%;background:#5B21B6"></div>
+        <span class="lbl">Standard Product Eligibility by Category</span>
+      </div>
+      <!-- Product table -->
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:8px">
+          <thead>
+            <tr>
+              <th style="padding:4px 6px;background:var(--navy);color:#FFF;font-weight:700;text-align:left">Product</th>
+              ${['Premium','Mass Aff.','Standard','Starter','Restricted'].map(c=>`<th style="padding:4px 5px;background:${c===catLabel||c==='Mass Aff.'&&catLabel==='Mass Affluent'?CAT_COLORS[category]:'var(--navy)'};color:#FFF;font-weight:700;text-align:center;min-width:55px">${c===catLabel||c==='Mass Aff.'&&catLabel==='Mass Affluent'?'▶ '+c:c}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${[
+              ['BANKING','header'],
+              ['Savings Acct',  'Prem','Prem','Std','Basic','Basic'],
+              ['Current Acct',  'SE only','SE only','SE only','—','—'],
+              ['Fixed Deposit',  '✓','✓','✓','—','—'],
+              ['Sweep-in FD',   '✓','✓','—','—','—'],
+              ['Recurring Dep.','✓','✓','✓','✓','—'],
+              ['CREDIT','header'],
+              ['CC4 (₹3L+)',    '✓ CF>₹1L','—','—','—','—'],
+              ['CC3 (₹1–3L)',   '✓','✓','—','—','—'],
+              ['CC2 (30K–1L)',  '✓','✓','✓ Mix+','—','—'],
+              ['CC1 (≤₹30K)',   '✓','✓','✓','✓ AA req','—'],
+              ['Overdraft (SE)','✓','✓','—','—','—'],
+              ['PL4 (₹15L+)',   '✓ ITR','—','—','—','—'],
+              ['PL3 (₹5–15L)',  '✓','✓','—','—','—'],
+              ['PL2 (₹2–5L)',   '✓','✓','✓ HW>5K','—','—'],
+              ['PL1 (≤₹2L)',    '✓','✓','✓','✓ AA+6M','—'],
+              ['HL Referral',   '✓','✓','—','—','—'],
+              ['AL Referral',   '✓','—','—','—','—'],
+              ['ADVISORY','header'],
+              ['MF / SIP',      '✓','✓','—','—','—'],
+              ['Insurance',     '✓ Full','✓ Full','✓ Basic','—','—'],
+              ['Wealth Mgmt',   '✓ CF>₹60K','—','—','—','—'],
+              ['Priority Bank', '✓ CF>₹1L','—','—','—','—'],
+            ].map((row,ri)=>{
+              if(row[1]==='header') return`<tr><td colspan="6" style="padding:4px 6px;background:var(--navy);color:rgba(255,255,255,0.6);font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">${row[0]}</td></tr>`;
+              const cats=['Premium','MassAff','Standard','Starter','Restricted'];
+              return`<tr style="background:${ri%2===0?'var(--bg)':'#FFF'}">
+                <td style="padding:3px 6px;color:var(--navy);font-weight:500;white-space:nowrap;border-right:1px solid var(--bdr)">${row[0]}</td>
+                ${cats.map((c,ci)=>{
+                  const val=row[ci+1];
+                  const active=c===category;
+                  const hasVal=val!=='—';
+                  return`<td style="padding:3px 5px;text-align:center;background:${active&&hasVal?catColor+'14':active&&!hasVal?'rgba(185,28,28,0.04)':''};border:1px solid ${active?catColor+'40':'var(--bdr)'};color:${hasVal?active?catColor:'#0D7A4E':'#CBD5E1'};font-weight:${active?700:400}">${val}</td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:5px;font-size:7.5px;color:var(--mu);line-height:1.5">
+        Mix+ = Sec or Mix portfolio · HW = Headroom EMI · ITR = verified doc · AA = Account Aggregator · CF = Available cashflow
+      </div>
+    </div>
+  </div>
+
+  <!-- COL 3: This customer's recommendations -->
+  <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto">
+    <div class="card" style="padding:13px 14px">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+        <div style="width:5px;height:5px;border-radius:50%;background:${catColor}"></div>
+        <span class="lbl">Recommendations — ${p.name.split(' ')[0]}</span>
+        <span style="margin-left:auto;font-size:8px;font-weight:700;padding:2px 8px;border-radius:3px;background:${catColor}14;color:${catColor}">
+          ${catLabel}
+        </span>
+      </div>
+      ${buildProductCards()}
+    </div>
+
+    <!-- Score drivers recap -->
+    <div class="card" style="padding:12px 14px">
+      <div class="lbl" style="margin-bottom:7px">Score Drivers</div>
+      ${p.drivers.map(d=>`
+      <div style="display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid var(--bdr)">
+        <div style="width:5px;height:5px;border-radius:50%;background:${d.p>0?'#0D7A4E':'#B91C1C'};flex-shrink:0"></div>
+        <div style="flex:1;font-size:9px;color:var(--mu);line-height:1.3">${d.t}</div>
+        <div style="font-size:10px;font-weight:700;color:${d.p>0?'#0D7A4E':'#B91C1C'};flex-shrink:0">${d.s}</div>
+      </div>`).join('')}
+    </div>
+
+    <!-- Narrator -->
+    <div class="card" style="padding:12px 14px">
+      <div class="lbl" style="margin-bottom:5px">Assessment</div>
+      <div style="font-size:9px;color:var(--mu);line-height:1.6">${p.narr}</div>
+    </div>
+  </div>
+</div>`;
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROCESSING ANIMATION
+// ─────────────────────────────────────────────────────────────────────────────
+function runProc(p,onDone){
+  const proc=document.getElementById("proc");
+  const m=p.appMeta||{};
+  const lines=[
+    ["🔗","Credit bureau pull — "+p.dem.Bureau+" · ref "+m.appNo],
+    ["🏦","Account Aggregator — Sahamati network · consent "+m.cifId],
+    ["🔍","Adverse check APIs — identity, address & velocity signals"],
+    ["💡","Income Estimation Engine — EMI-back · bureau tradelines · forward growth"],
+    ["📊","Credit Risk Engine — adjusted score · pillar breakdown · override check"]
+  ];
+  document.getElementById("proc-name").textContent=(p.appMeta?.appNo||p.name)+' · '+p.name;
+  document.getElementById("plines").innerHTML=lines.map((_,i)=>`
+    <div class="pline" id="pl${i}">
+      <div class="pico">${lines[i][0]}</div>
+      <div class="ptxt">${lines[i][1]}</div>
+      <div class="pst" id="ps${i}" style="color:var(--mu)">Queued</div>
+    </div>`).join('');
+  document.getElementById("pdone").style.opacity="0";
+  proc.classList.add("on");
+  tms.forEach(t=>clearTimeout(t));tms=[];
+  const go=[0,380,800,1300,1870];
+  const ok=[280,660,1100,1650,2250];
+  lines.forEach((_,i)=>{
+    tms.push(setTimeout(()=>{
+      const el=document.getElementById("pl"+i),st=document.getElementById("ps"+i);
+      if(!el)return;el.classList.add("go");
+      st.innerHTML=`<span class="spinr"></span>`;st.style.color="var(--gold)";
+    },go[i]));
+    tms.push(setTimeout(()=>{
+      const el=document.getElementById("pl"+i),st=document.getElementById("ps"+i);
+      if(!el)return;el.classList.remove("go");el.classList.add("dn");
+      st.textContent="Done ✓";st.style.color="var(--gr)";
+    },ok[i]));
+  });
+  tms.push(setTimeout(()=>{document.getElementById("pdone").style.opacity="1";},2500));
+  tms.push(setTimeout(()=>{proc.classList.remove("on");onDone();},3100));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+function goTo(n){
+  document.querySelectorAll(".screen").forEach((el,i)=>el.classList.toggle("act",i===n));
+  CS=n;upd();
+}
+function nav(d){
+  const n=CS+d;
+  if(n<0||n>2)return;
+  if(CS===0&&n===1){
+    runProc(P[CP],()=>{r2(P[CP]);goTo(1);});
+  } else if(CS===1&&n===2){
+    r3(P[CP]);goTo(2);
+  } else if(n>=0&&n<=2){
+    goTo(n);
+  }
+}
+function selP(i){
+  CP=i;
+  document.querySelectorAll(".pp").forEach((el,j)=>el.classList.toggle("act",j===i));
+  r1(P[CP]);
+  if(CS===1){r2(P[CP]);}
+  if(CS===2){r3(P[CP]);}
+  document.getElementById("steplbl").textContent=STEPS[CS];
+  updAppBar();
+}
+function updAppBar(){
+  const p=P[CP],m=p.appMeta||{};
+  const an=document.getElementById("ab-appno");
+  const ac=document.getElementById("ab-cif");
+  const ab=document.getElementById("ab-branch");
+  const ad=document.getElementById("ab-date");
+  const nm=document.getElementById("ab-name");
+  if(an)an.textContent=m.appNo||'—';
+  if(ac)ac.textContent=(m.cifId||'—');
+  if(ab)ab.textContent=(m.branch||'—');
+  if(ad)ad.textContent='Applied: '+(m.appDate||'—');
+  if(nm)nm.textContent=p.name;
+}
+function upd(){
+  const bp=document.getElementById("bprev"),bn=document.getElementById("bnext");
+  bp.disabled=CS===0;
+  if(CS===0){bn.textContent="Proceed to Income Analysis →";}
+  else if(CS===1){bn.textContent="View Product Decision →";}
+  else{bn.textContent="Back to Queue ↺";bn.onclick=()=>{goTo(0);};}
+  if(CS<2)bn.onclick=()=>nav(1);
+  document.getElementById("steplbl").textContent=STEPS[CS];
+  document.querySelectorAll(".sdot").forEach((el,i)=>{
+    el.classList.toggle("act",i===CS);
+    el.classList.toggle("done",i<CS);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+document.getElementById("ppills").innerHTML=P.map((p,i)=>
+  `<button class="pp ${i===0?"act":""}" onclick="selP(${i})" title="${p.name} · ${p.appMeta?.appDate||''}">
+    <span style="font-family:var(--fm);font-size:8px;opacity:.7">${(p.appMeta?.appNo||'').replace('APP-2025-','')}</span>
+    <span style="margin-left:4px">${p.name.split(" ")[0]}</span>
+  </button>`).join('');
+
+document.getElementById("steps").innerHTML=STEPS.map((s,i)=>`
+  <div class="step">
+    ${i>0?'<div class="sline"></div>':''}
+    <div class="sdot ${i===0?"act":""}" onclick="if(${i}<=CS)goTo(${i})" title="${s}">${i+1}</div>
+  </div>`).join('');
+
+r1(P[0]);upd();updAppBar();
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key===" ")nav(1);
+  if(e.key==="ArrowLeft")nav(-1);
+  P.forEach((_,i)=>{if(e.key===(i+1).toString())selP(i);});
+});
+</script>
+</body>
+</html>
